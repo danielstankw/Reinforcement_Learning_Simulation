@@ -1,0 +1,86 @@
+<?xml version="1.0" ?><mujoco model="hole">	
+
+        
+		
+ 	<asset>		
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+					<mesh file="/home/danieln1/Downloads/original_n5/robosuite/models/assets/objects/meshes/object/Sphere_hull_1.stl" name="hole_1" scale="1.5 1.5 3"/>		
+			
+					<mesh file="/home/danieln1/Downloads/original_n5/robosuite/models/assets/objects/meshes/object/Cube_hull_1.stl" name="hole_2" scale="1.5 1.5 3"/>		
+					<mesh file="/home/danieln1/Downloads/original_n5/robosuite/models/assets/objects/meshes/object/Cube_hull_2.stl" name="hole_3" scale="1.5 1.5 3"/>		
+					<mesh file="/home/danieln1/Downloads/original_n5/robosuite/models/assets/objects/meshes/object/Cube_hull_3.stl" name="hole_4" scale="1.5 1.5 3"/>		
+					<mesh file="/home/danieln1/Downloads/original_n5/robosuite/models/assets/objects/meshes/object/Cube_hull_4.stl" name="hole_5" scale="1.5 1.5 3"/>		
+					<mesh file="/home/danieln1/Downloads/original_n5/robosuite/models/assets/objects/meshes/object/Cube_hull_5.stl" name="hole_6" scale="1.5 1.5 3"/>		
+					<mesh file="/home/danieln1/Downloads/original_n5/robosuite/models/assets/objects/meshes/object/Cube_hull_6.stl" name="hole_7" scale="1.5 1.5 3"/>		
+					<mesh file="/home/danieln1/Downloads/original_n5/robosuite/models/assets/objects/meshes/object/Cube_hull_7.stl" name="hole_8" scale="1.5 1.5 3"/>		
+					<mesh file="/home/danieln1/Downloads/original_n5/robosuite/models/assets/objects/meshes/object/Cube_hull_8.stl" name="hole_9" scale="1.5 1.5 3"/>		
+					<mesh file="/home/danieln1/Downloads/original_n5/robosuite/models/assets/objects/meshes/object/Cube_001_hull_1.stl" name="hole_10" scale="1.5 1.5 3"/>		
+					<mesh file="/home/danieln1/Downloads/original_n5/robosuite/models/assets/objects/meshes/object/Cube_002_hull_1.stl" name="hole_11" scale="1.5 1.5 3"/>		
+					<mesh file="/home/danieln1/Downloads/original_n5/robosuite/models/assets/objects/meshes/object/Cube_003_hull_1.stl" name="hole_12" scale="1.5 1.5 3"/>		
+					<mesh file="/home/danieln1/Downloads/original_n5/robosuite/models/assets/objects/meshes/object/Cube_004_hull_1.stl" name="hole_13" scale="1.5 1.5 3"/>		
+
+	
+			<texture file="/home/danieln1/Downloads/original_n5/robosuite/models/assets/objects/../textures/ceramic.png" name="hole_tex-ceramic"/>		
+    		<material name="hole_ceramic" reflectance="0.5" texrepeat="1 1" texture="hole_tex-ceramic" texuniform="true"/>		
+  	</asset>	
+  
+  
+  	<worldbody>		
+
+    		<body>			
+					<body name="hole_object">				
+		
+						<geom pos="0 0 -0.05" mesh="hole_2" type="mesh" solimp="0.998 0.998 0.001" solref="0.001 1" density="6700" friction="0.95 0.3 0.1" material="hole_ceramic" group="1" condim="4" rgba="0 1 0 1"/>				
+						<geom pos="0 0 -0.05" mesh="hole_3" type="mesh" solimp="0.998 0.998 0.001" solref="0.001 1" density="6700" friction="0.95 0.3 0.1" material="hole_ceramic" group="1" condim="4" rgba="0 1 0 1"/>				
+						<geom pos="0 0 -0.05" mesh="hole_4" type="mesh" solimp="0.998 0.998 0.001" solref="0.001 1" density="6700" friction="0.95 0.3 0.1" material="hole_ceramic" group="1" condim="4" rgba="0 1 0 1"/>				
+						<geom pos="0 0 -0.05" mesh="hole_5" type="mesh" solimp="0.998 0.998 0.001" solref="0.001 1" density="6700" friction="0.95 0.3 0.1" material="hole_ceramic" group="1" condim="4" rgba="0 1 0 1"/>				
+						<geom pos="0 0 -0.05" mesh="hole_6" type="mesh" solimp="0.998 0.998 0.001" solref="0.001 1" density="6700" friction="0.95 0.3 0.1" material="hole_ceramic" group="1" condim="4" rgba="0 1 0 1"/>				
+						<geom pos="0 0 -0.05" mesh="hole_7" type="mesh" solimp="0.998 0.998 0.001" solref="0.001 1" density="6700" friction="0.95 0.3 0.1" material="hole_ceramic" group="1" condim="4" rgba="0 1 0 1"/>				
+						<geom pos="0 0 -0.05" mesh="hole_8" type="mesh" solimp="0.998 0.998 0.001" solref="0.001 1" density="6700" friction="0.95 0.3 0.1" material="hole_ceramic" group="1" condim="4" rgba="0 1 0 1"/>				
+						<geom pos="0 0 -0.05" mesh="hole_9" type="mesh" solimp="0.998 0.998 0.001" solref="0.001 1" density="6700" friction="0.95 0.3 0.1" material="hole_ceramic" group="1" condim="4" rgba="0 1 0 1"/>				
+						<geom pos="0 0 -0.05" mesh="hole_10" type="mesh" solimp="0.998 0.998 0.001" solref="0.001 1" density="6700" friction="0.95 0.3 0.1" material="hole_ceramic" group="1" condim="4" rgba="0 1 0 1"/>				
+						<geom pos="0 0 -0.05" mesh="hole_11" type="mesh" solimp="0.998 0.998 0.001" solref="0.001 1" density="6700" friction="0.95 0.3 0.1" material="hole_ceramic" group="1" condim="4" rgba="0 1 0 1"/>				
+						<geom pos="0 0 -0.05" mesh="hole_12" type="mesh" solimp="0.998 0.998 0.001" solref="0.001 1" density="6700" friction="0.95 0.3 0.1" material="hole_ceramic" group="1" condim="4" rgba="0 1 0 1"/>				
+						<geom pos="0 0 -0.05" mesh="hole_13" type="mesh" solimp="0.998 0.998 0.001" solref="0.001 1" density="6700" friction="0.95 0.3 0.1" material="hole_ceramic" group="1" condim="4" rgba="0 1 0 1"/>				
+
+		
+
+						<site name="hole_middle_cylinder" pos="0.000 0.000 -0.0" size="0.0002 0.0002 0.0002"/>				
+		
+		
+		 
+						<body name="hole_hole" pos="0.00 0.000 -0.06">					
+								<geom density="3000" friction="1.0 0.005 0.0001" group="1" name="hole_hole" rgba="1 0 0 1" size="0.001 0.001 0.001" type="box"/>					
+
+						</body>				
+
+
+		
+		
+					</body>			
+
+      			<body name="hole_visual">
+
+        
+      </body>			
+
+      			<site rgba="0 0 0 0" size="0.005" pos="0 0 -0.02" name="hole_bottom_site"/>			
+      			<site rgba="0 0 0 0" size="0.005" pos="0 0 0.02" name="hole_top_site"/>			
+      			<site rgba="0 0 0 0" size="0.005" pos="0.25 0.25 0.1" name="hole_horizontal_radius_site"/>			
+    		</body>		
+  	</worldbody>	
+	<actuator/>	<sensor/>	<tendon/>	<equality/>	<contact/>	<default/></mujoco>

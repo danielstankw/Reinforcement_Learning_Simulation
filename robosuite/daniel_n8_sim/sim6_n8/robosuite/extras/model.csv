@@ -1,0 +1,17 @@
+Num of envs,20
+Initialization seed of NN,9
+N_steps,1
+Training steps,20000
+Policy_kwargs,{'activation_fn': <class 'torch.nn.modules.linear.Identity'>, 'net_arch': [{'pi': [], 'vf': []}]}
+Policy,ActorCriticPolicy(
+  (features_extractor): FlattenExtractor(
+    (flatten): Flatten(start_dim=1, end_dim=-1)
+  )
+  (mlp_extractor): MlpExtractor(
+    (shared_net): Sequential()
+    (policy_net): Sequential()
+    (value_net): Sequential()
+  )
+  (action_net): Linear(in_features=3, out_features=26, bias=True)
+  (value_net): Linear(in_features=3, out_features=1, bias=True)
+)

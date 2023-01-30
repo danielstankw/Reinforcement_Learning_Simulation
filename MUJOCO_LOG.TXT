@@ -1,0 +1,36 @@
+Sun Dec 13 12:39:27 2020
+ERROR: Expired activation key
+
+Sun Dec 13 12:39:48 2020
+ERROR: Expired activation key
+
+Sun Dec 13 12:40:14 2020
+ERROR: Expired activation key
+
+Sun Dec 13 12:41:29 2020
+ERROR: Expired activation key
+
+Sun Mar 21 13:40:53 2021
+ERROR: GLEW initalization error: Missing GL version
+
+Sun Mar 21 13:42:09 2021
+ERROR: GLEW initalization error: Missing GL version
+
+Sun Mar 21 13:44:37 2021
+ERROR: GLEW initalization error: Missing GL version
+
+Sun Mar 21 13:50:11 2021
+ERROR: GLEW initalization error: Missing GL version
+
+Sun Mar 21 13:52:29 2021
+ERROR: GLEW initalization error: Missing GL version
+
+Sun Mar 21 14:07:24 2021
+ERROR: GLEW initalization error: Missing GL version
+
+Wed May 19 19:43:00 2021
+ERROR: Fixed camera id is outside valid range
+
+Wed May 19 19:47:53 2021
+ERROR: Fixed camera id is outside valid range
+

@@ -1,0 +1,22 @@
+Num of envs,1
+Initialization seed of NN,4
+N_steps,10
+Training steps,15000
+Policy_kwargs,{'activation_fn': <class 'torch.nn.modules.activation.LeakyReLU'>, 'net_arch': [32, 32]}
+Policy,ActorCriticPolicy(
+  (features_extractor): FlattenExtractor(
+    (flatten): Flatten(start_dim=1, end_dim=-1)
+  )
+  (mlp_extractor): MlpExtractor(
+    (shared_net): Sequential(
+      (0): Linear(in_features=3, out_features=32, bias=True)
+      (1): LeakyReLU(negative_slope=0.01)
+      (2): Linear(in_features=32, out_features=32, bias=True)
+      (3): LeakyReLU(negative_slope=0.01)
+    )
+    (policy_net): Sequential()
+    (value_net): Sequential()
+  )
+  (action_net): Linear(in_features=32, out_features=26, bias=True)
+  (value_net): Linear(in_features=32, out_features=1, bias=True)
+)

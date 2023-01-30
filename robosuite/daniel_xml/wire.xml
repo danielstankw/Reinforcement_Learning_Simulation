@@ -1,0 +1,17 @@
+<mujoco model="wire">
+  <asset>
+    <texture file="../textures/metal.png" type="2d" name="metal-tex"/>
+    <material name="metal-material" reflectance="0.5" texrepeat="1 1" texture="metal-tex"/>
+  </asset>
+  <worldbody>
+    <body>
+        <body name="object" pos="0.5 0.5 0.06" quat="0.5 0.5 -0.5 -0.5">
+          <composite type="rope" count="21 1 1" spacing="0.04" offset="0 0 2">
+            <joint kind="main" damping="0.005"/>
+            <geom type="capsule" size=".01 .015" rgba=".8 .2 .1 1"/>
+          </composite>
+        </body>
+        <site rgba="0 0 0 0" size="0.005" pos="0 0 -0.05" name="bottom_site"/>
+    </body>
+  </worldbody>
+</mujoco>

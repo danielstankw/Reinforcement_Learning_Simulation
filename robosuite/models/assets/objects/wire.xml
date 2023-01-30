@@ -1,0 +1,26 @@
+ <mujoco model="soft_object">
+  <asset>
+    <texture file="../textures/metal.png" type="2d" name="metal-tex"/>
+    <material name="metal-material" reflectance="0.5" texrepeat="1 1" texture="metal-tex"/>
+  </asset>
+  <worldbody>
+    <body>
+        <body name="object" pos="0 0 0">
+            <joint name="joint1" pos="0 0 0" axis="0 0 1" limited="true" range="-6.28319 6.28319" damping="0.001" frictionloss="0.01" />
+            <site rgba="0 0 0 0" size="0.005" pos="0 0 -0.05" name="bottom_site"/>
+            <geom rgba="0.5 0 0 1" margin="0.001" density="1" friction="1 0.01 0.001" solref="0.01 0.5" solimp="0.9 0.95 0.001" type="cylinder" size="0.006 0.06" pos="0 0 0" group="0" name="peg_g0"/>
+            <body name="link2" pos="0 0 0.06">
+                <joint name="joint2" pos="0 0 0" axis="0 0 1" limited="true" range="-6.28319 6.28319" damping="0.001" frictionloss="0.01" />
+                <geom rgba="1 0 0 1" margin="0.001" density="1" friction="1 0.01 0.001" solref="0.01 0.5" solimp="0.9 0.95 0.001" type="cylinder" size="0.0021 0.03" pos="0 0 0" group="0" name="peg_g1"/>
+            </body>
+        </body>
+    </body>
+  </worldbody>
+</mujoco>
+
+<!--<body pos="0 0 0" name="peg_main">-->
+<!--<geom rgba="0.5 0 0 1" margin="0.001" density="1" friction="1 0.01 0.001" solref="0.01 0.5" solimp="0.9 0.95 0.001" type="cylinder" size="0.0021 0.03" pos="0 0 0" group="0" name="peg_g0"/>-->
+<!--<geom conaffinity="0" contype="0" mass="1e-8" rgba="1 0 0 1" type="cylinder" size="0.0021 0.03" pos="0 0 0" group="1" name="peg_g0_vis"/>-->
+<!--<site type="sphere" group="0" pos="0 0 0" size="0.002 0.002 0.002" rgba="1 0 0 1" name="peg_default_site"/>-->
+<!--<site pos="0 0 0.03" size="0.0005" rgba="1 0 0 1" name="peg_site"/>-->
+<!--</body>-->
