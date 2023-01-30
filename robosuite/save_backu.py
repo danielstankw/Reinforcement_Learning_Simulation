@@ -131,7 +131,7 @@ class ImpedanceWithSpiral(Controller):
         )
 
         self.overlap = False
-        self.model = keras.models.load_model("final_model_1")
+        self.model = keras.models.load_model("keras_models/final_model_1")
         # self.model = pickle.load(open('RFClassifier.sav', 'rb'))
         self.threshold_precision = 0.866
 

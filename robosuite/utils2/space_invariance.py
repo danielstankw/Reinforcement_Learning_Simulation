@@ -1,6 +1,6 @@
 import numpy as np
 
-my_data = np.genfromtxt('action_matrix.csv', delimiter=',')
+my_data = np.genfromtxt('../action_matrix.csv', delimiter=',')
 print(my_data.shape)
 
 dims = 26
