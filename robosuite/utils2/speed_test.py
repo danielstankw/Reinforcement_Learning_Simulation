@@ -4,9 +4,9 @@ import numpy as np
 import pandas as pd
 from tensorflow import keras
 
-dff1 = pd.read_csv('../circle_0.0008.csv')
-dff2 = pd.read_csv('../circle_0.0007.csv')
-dff3 = pd.read_csv('../circle_0.0006.csv')
+dff1 = pd.read_csv('../measurements/circle_0.0008.csv')
+dff2 = pd.read_csv('../measurements/circle_0.0007.csv')
+dff3 = pd.read_csv('../measurements/circle_0.0006.csv')
 
 # 3-no overlap, 2-overlap but not insert, 1-enough to insert
 # we will combine 3 and 2 into 0 label
