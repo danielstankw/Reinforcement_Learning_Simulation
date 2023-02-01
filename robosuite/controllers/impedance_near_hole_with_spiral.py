@@ -65,9 +65,7 @@ class ImpedanceWithSpiral(Controller):
         self.x_current = 0
         self.y_current = 0
         self.overlap = False
-        self.model = keras.models.load_model("final_model_1")
-        # self.model = pickle.load(open('RFClassifier.sav', 'rb'))
-        self.threshold_precision = 0.866
+
 
         self.circle = circle
         self.wait_time = wait_time

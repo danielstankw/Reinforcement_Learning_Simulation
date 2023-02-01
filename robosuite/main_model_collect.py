@@ -183,7 +183,7 @@ if __name__ == "__main__":
     plot_graphs = True
     render = True
     error_type = "fixed"
-    error_vec = np.array([0.0, -3.7, 0.0])/1000  # in mm
+    error_vec = np.array([0.0, -3.6, 0.0])/1000  # in mm
     circle_motion = False  # parameters of circle motion are in the controller file
 
     # RANDOMIZATION OF PARAMS

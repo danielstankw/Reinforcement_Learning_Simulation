@@ -7,6 +7,7 @@ from robosuite.controllers.base_controller import Controller
 import robosuite.utils.transform_utils as T
 import tensorflow as tf
 from tensorflow import keras
+import xgboost as xgb
 
 from matplotlib import pyplot as plt
 import numpy as np
@@ -20,7 +21,7 @@ ERROR_TOP = 0.0007
 PEG_RADIUS = 0.0021
 HOLE_RADIUS = 0.0024
 
-MEMORY_LEN = 12
+MEMORY_LEN = 300
 FEATURE_SIZE = 5
 
 
@@ -68,7 +69,14 @@ class ImpedanceWithSpiralAndML(Controller):
 
         self.cnt = 0
         self.overlap = False
-        self.model = keras.models.load_model('test_12')
+        self.model = keras.models.load_model('./keras_models/sim_final_full')
+        # self.model = xgb.XGBClassifier(objective='binary:logistic',
+        #                           seed=42,
+        #                           n_estimators=230,
+        #                           eval_metric='aucpr',
+        #                           n_jobs=-1)
+        #
+        # self.model.load_model("./keras_models/xgboost_sim_full.json")
         # self.model = pickle.load(open('RFClassifier.sav', 'rb'))
         self.threshold_precision = threshold
 
@@ -304,6 +312,7 @@ class ImpedanceWithSpiralAndML(Controller):
                 if not self.insertion:
                     x = np.array(self.memory).reshape(1, MEMORY_LEN*FEATURE_SIZE)
                     y_predict = self.model(x)
+                    # y_predict = self.model.predict_proba(x)[:, 1][0]
                     temp_overlap = (y_predict >= self.threshold_precision)
                     print('prediction', y_predict)
                     inst_overlap = temp_overlap.numpy()[0][0]  # boolean true/false conversion tensor->bool

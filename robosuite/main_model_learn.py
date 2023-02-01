@@ -142,9 +142,9 @@ def evaluate(model: "base_class.BaseAlgorithm",
         my_dict['success'].append(_info.get('is_success'))
         my_dict['error'].append(_info.get('error'))
         #
-        # file_name = 'daniel_n8_sim/sim15_n8/scaled_error.pkl'
-        # with open(file_name, 'wb') as f:
-        #     pickle.dump(my_dict, f)
+        file_name = 'xgboost_error.pkl'
+        with open(file_name, 'wb') as f:
+            pickle.dump(my_dict, f)
     mean_reward = np.mean(episode_rewards)
     std_reward = np.std(episode_rewards)
     if reward_threshold is not None:
@@ -194,22 +194,22 @@ def model_info_collect(model):
 
 if __name__ == "__main__":
     # Create log dir
-    log_dir = 'daniel_n8_sim/sim15_n8/robosuite/'
+    log_dir = './robosuite/'
     log_dir_extras = os.path.join(log_dir, 'extras')
     log_dir_callback = os.path.join(log_dir, 'callback')
     os.makedirs(log_dir_callback, exist_ok=True)
     os.makedirs(log_dir_extras, exist_ok=True)
 
     """To collect data: use_spiral=True/ use_ml=False"""
-    use_spiral = False
-    use_ml = False
+    use_spiral = True
+    use_ml = True
     threshold = 0.5
     use_impedance = True  # or pd
-    plot_graphs = True
+    plot_graphs = False
     render = True
-    error_type = "fixed"
+    error_type = "ring"
     error_vec = np.array([3.3, 0.0, 0.0]) / 1000 # in mm
-    overlap_wait_time = 0.0
+    overlap_wait_time = 2.0
     circle_motion = False  # parameters of circle motion are in the controller file
 
 
@@ -218,14 +218,7 @@ if __name__ == "__main__":
     total_sim_time = 25 + 60 #+ 90#40#  25 #+ 10
     time_free_space = 2.5
     time_insertion = 13.5
-# daniel - long
-    # total_sim_time = 35.0
-    # time_free_space = 5
-    # time_insertion = 25.0
-# elad
-#     total_sim_time = 15.0
-#     time_free_space = 5.0
-#     time_insertion = 4.0
+
     time_impedance = total_sim_time - (time_free_space + time_insertion)
 
     control_freq = 20
@@ -272,8 +265,8 @@ if __name__ == "__main__":
             fixed_error_vec=error_vec  # mm
         )
     )
-    eval_steps = 50
-    learning_steps = 10000
+    eval_steps = 10
+    learning_steps = 6_000
     # seed = 4
     seed = seed_initializer()
     mode = 'eval'
@@ -296,12 +289,13 @@ if __name__ == "__main__":
 
         model.learn(total_timesteps=learning_steps, tb_log_name="learning", callback=reward_callback)
         print("------------ Done Training -------------")
-        model.save('new_scaled.zip')
+        model.save('30Jan23_scaled.zip')
 
     if mode == 'eval':
         print('Evaluating Model')
-        # model = PPO.load("./daniel_n8_sim/sim11_n8/robosuite/callback/best_model_callback.zip", verbose=1, env=env)
-        model = PPO.load("./daniel_n8_sim/sim15_n8/robosuite/callback/best_model_callback.zip", verbose=1, env=env) # requires rescale
+        model = PPO.load("./daniel_n8_sim/sim11_n8/robosuite/callback/best_model_callback.zip", verbose=1, env=env)
+        # model = PPO.load("./daniel_n8_sim/sim15_n8/robosuite/callback/best_model_callback.zip", verbose=1, env=env) # requires rescale
+        # model = PPO.load("./daniel_n8_sim/sim16_n8/robosuite/callback/best_model_callback.zip", verbose=1, env=env) # requires rescale
 
     if mode == 'continue_train':
         print('Training Continuation')
