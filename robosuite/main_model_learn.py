@@ -139,12 +139,12 @@ def evaluate(model: "base_class.BaseAlgorithm",
         print(f"Episode number: {i+1},reward: {episode_reward}, sim time: {np.round(_info.get('time'),7)} "
               f"| horizon: {_info.get('horizon')} | real time {_info.get('episode').get('t')} ")
 
-        my_dict['success'].append(_info.get('is_success'))
-        my_dict['error'].append(_info.get('error'))
-        #
-        file_name = 'xgboost_error.pkl'
-        with open(file_name, 'wb') as f:
-            pickle.dump(my_dict, f)
+        # my_dict['success'].append(_info.get('is_success'))
+        # my_dict['error'].append(_info.get('error'))
+        # #
+        # file_name = 'xgboost_error.pkl'
+        # with open(file_name, 'wb') as f:
+        #     pickle.dump(my_dict, f)
     mean_reward = np.mean(episode_rewards)
     std_reward = np.std(episode_rewards)
     if reward_threshold is not None:
@@ -201,12 +201,12 @@ if __name__ == "__main__":
     os.makedirs(log_dir_extras, exist_ok=True)
 
     """To collect data: use_spiral=True/ use_ml=False"""
-    use_spiral = True
-    use_ml = True
-    threshold = 0.5
+    use_spiral = False
+    use_ml = False
+    threshold = 0.8
     use_impedance = True  # or pd
     plot_graphs = False
-    render = True
+    render = False
     error_type = "ring"
     error_vec = np.array([3.3, 0.0, 0.0]) / 1000 # in mm
     overlap_wait_time = 2.0
@@ -215,7 +215,7 @@ if __name__ == "__main__":
 
     # #
 # shir
-    total_sim_time = 25 + 60 #+ 90#40#  25 #+ 10
+    total_sim_time = 25 #+ 60 #+ 90#40#  25 #+ 10
     time_free_space = 2.5
     time_insertion = 13.5
 
@@ -265,7 +265,7 @@ if __name__ == "__main__":
             fixed_error_vec=error_vec  # mm
         )
     )
-    eval_steps = 10
+    eval_steps = 100
     learning_steps = 6_000
     # seed = 4
     seed = seed_initializer()
@@ -293,9 +293,9 @@ if __name__ == "__main__":
 
     if mode == 'eval':
         print('Evaluating Model')
-        model = PPO.load("./daniel_n8_sim/sim11_n8/robosuite/callback/best_model_callback.zip", verbose=1, env=env)
+        # model = PPO.load("./daniel_n8_sim/sim11_n8/robosuite/callback/best_model_callback.zip", verbose=1, env=env)
         # model = PPO.load("./daniel_n8_sim/sim15_n8/robosuite/callback/best_model_callback.zip", verbose=1, env=env) # requires rescale
-        # model = PPO.load("./daniel_n8_sim/sim16_n8/robosuite/callback/best_model_callback.zip", verbose=1, env=env) # requires rescale
+        model = PPO.load("./daniel_n8_sim/sim16_n8/robosuite/callback/best_model_callback.zip", verbose=1, env=env) # requires rescale
 
     if mode == 'continue_train':
         print('Training Continuation')

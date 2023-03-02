@@ -5,7 +5,7 @@ from matplotlib import pyplot as plt
 
 
 import pickle
-file = '/home/user/Desktop/Simulation_n5/robosuite/daniel_n8_sim/sim15_n8/scaled_error'
+file = '/home/user/Desktop/Daniel_simulation/robosuite/100_simulation_errors'
 name = file + '.pkl'
 with open(name, 'rb') as f:
     loaded_dict = pickle.load(f)
@@ -16,8 +16,8 @@ errors = np.array(loaded_dict.get('error'))
 peg_radius = 2.1/1000
 hole_radius = 2.4/1000
 
-r_low = 0.6/1000
-r_high = 0.8/1000
+r_low = 3.3/1000
+r_high = 3.9/1000
 R_hole = hole_radius
 R_peg = peg_radius
 theta = np.linspace(0, 2*np.pi, 1000)
@@ -40,11 +40,11 @@ plt.axhline(y=0, color='k', linestyle='dotted')
 plt.axvline(x=0, color='k', linestyle='dotted')
 for i in range(len(errors)):
     err = errors[i]
-    suc = success[i]
-    if suc:
-        plt.scatter(err[0], err[1], c='green')
-    else:
-        plt.scatter(err[0], err[1], c='red')
+    # suc = success[i]
+    # if suc:
+    #     plt.scatter(err[0], err[1], c='green')
+    # else:
+    plt.scatter(err[0], err[1], c='red')
         # print(f'Unsuccessful insertion for: {err[:2]*1000}mm')
 
 plt.grid()

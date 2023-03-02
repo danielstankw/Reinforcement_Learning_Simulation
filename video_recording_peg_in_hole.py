@@ -89,26 +89,58 @@ def evaluate(model: "base_class.BaseAlgorithm",
 
 if __name__ == "__main__":
 
+    """To collect data: use_spiral=True/ use_ml=False"""
+    use_spiral = True
+    use_ml = True
+    threshold = 0.8
+    use_impedance = True  # or pd
+    plot_graphs = False
+    render = True
+    error_type = "ring"
+    error_vec = np.array([3.3, 0.0, 0.0]) / 1000  # in mm
+    overlap_wait_time = 2.0
+    circle_motion = False  # parameters of circle motion are in the controller file
+
+    # #
+    # shir
+    total_sim_time = 25 + 60  # + 90#40#  25 #+ 10
+    time_free_space = 2.5
+    time_insertion = 13.5
+
+    time_impedance = total_sim_time - (time_free_space + time_insertion)
+
+    control_freq = 20
+    control_dim = 26  # 38 # 32
+    horizon = total_sim_time * control_freq
+
+    if use_spiral:
+        control_mode = 'IMPEDANCE_WITH_SPIRAL'
+    else:
+        control_mode = 'IMPEDANCE_POSE_Partial'
+    if use_ml:
+        control_mode = "IMPEDANCE_WITH_SPIRAL_AND_ML"
+
     parser = argparse.ArgumentParser()
-    parser.add_argument("--environment", type=str, default="PegInHole")
+    parser.add_argument("--environment", type=str, default="PegInHoleSmall")
     parser.add_argument("--robots", nargs="+", type=str, default="UR5e", help="Which robot(s) to use in the env")
     parser.add_argument("--camera", type=str, default="sideview", help="Name of camera to render") #robot0_eye_in_hand,robot0_robotview
-    parser.add_argument("--video_path", type=str, default="video_8.mp4")
+    parser.add_argument("--video_path", type=str, default="video_daniel.mp4")
     parser.add_argument("--timesteps", type=int, default=500)
     parser.add_argument("--height", type=int, default=512)
     parser.add_argument("--width", type=int, default=512)
     parser.add_argument("--skip_frame", type=int, default=1)
     args = parser.parse_args()
 
-    control_param = dict(type='IMPEDANCE_PB', input_max=1, input_min=-1, output_max=[0.05, 0.05, 0.05, 0.5, 0.5, 0.5],
-                         output_min=[-0.05, -0.05, -0.05, -0.5, -0.5, -0.5], kp=150, damping_ratio=1,
-                         impedance_mode='fixed', kp_limits=[0, 300], damping_ratio_limits=[0, 10], position_limits=None,
-                         orientation_limits=None, uncouple_pos_ori=True, control_delta=True, interpolation=None,
-                         ramp_ratio=0.2)
+    control_param = dict(type=control_mode, input_max=1, input_min=-1,
+                         output_max=[0.05, 0.05, 0.05, 0.5, 0.5, 0.5],
+                         output_min=[-0.05, -0.05, -0.05, -0.5, -0.5, -0.5], kp=700, damping_ratio=np.sqrt(2),
+                         impedance_mode='fixed', kp_limits=[0, 100000], damping_ratio_limits=[0, 10],
+                         position_limits=None, orientation_limits=None, uncouple_pos_ori=True, control_delta=True,
+                         interpolation=None, ramp_ratio=0.2, control_dim=control_dim, ori_method='rotation',
+                         show_params=False, total_time=total_sim_time, plotter=plot_graphs, use_impedance=use_impedance,
+                         circle=circle_motion, wait_time=overlap_wait_time, threshold=threshold)
     # initialize an environment with offscreen renderer
     env = make(
-    # env = GymWrapper(
-    #     suite.make(
         args.environment,
         args.robots,
         has_renderer=False,
@@ -122,22 +154,14 @@ if __name__ == "__main__":
         # has_offscreen_renderer=False,  # not needed since not using pixel obs
         # has_renderer=True,  # make sure we can render to the screen
         reward_shaping=True,  # use dense rewards
-        control_freq=20,  # control should happen fast enough so that simulation looks smooth
-        controller_configs=control_param
+        control_freq=control_freq,  # control should happen fast enough so that simulation looks smooth
+        r_reach_value=0.2,
+        tanh_value=20.0,
+        error_type=error_type,
+        control_spec=control_dim,
+        dist_error=0.8,  # mm
+        fixed_error_vec=error_vec  # mm
     )
-    # )
-    # env = GymWrapper(
-    #     suite.make(
-    #         "PegInHole",
-    #         robots="UR5e",  # use UR5e robot
-    #         use_camera_obs=False,  # do not use pixel observations
-    #         has_offscreen_renderer=False,  # not needed since not using pixel obs
-    #         has_renderer=True,  # make sure we can render to the screen
-    #         reward_shaping=True,  # use dense rewards
-    #         control_freq=20,  # control should happen fast enough so that simulation looks smooth
-    #         controller_configs=control_param
-    #     )
-    # )
 
     obs = env.reset()
     ndim = env.action_dim

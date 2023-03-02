@@ -21,7 +21,7 @@ ERROR_TOP = 0.0007
 PEG_RADIUS = 0.0021
 HOLE_RADIUS = 0.0024
 
-MEMORY_LEN = 300
+MEMORY_LEN = 100
 FEATURE_SIZE = 5
 
 
@@ -69,7 +69,7 @@ class ImpedanceWithSpiralAndML(Controller):
 
         self.cnt = 0
         self.overlap = False
-        self.model = keras.models.load_model('./keras_models/sim_final_full')
+        self.model = keras.models.load_model('./keras_models/sim_feb8_full')
         # self.model = xgb.XGBClassifier(objective='binary:logistic',
         #                           seed=42,
         #                           n_estimators=230,
@@ -84,7 +84,7 @@ class ImpedanceWithSpiralAndML(Controller):
         self.wait_time = wait_time
 
         self.memory = [[0] * FEATURE_SIZE for _ in range(MEMORY_LEN)]
-        self.pred_num = 5# 10#6# 100 -> equivalent to window of 12 and take it 50 times
+        self.pred_num = 10# 5# 10#6# 100 -> equivalent to window of 12 and take it 50 times
         self.pred_memory = [0 for _ in range(self.pred_num)]
 
         # spiral parameters

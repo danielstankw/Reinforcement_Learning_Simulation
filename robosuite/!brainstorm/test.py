@@ -14,7 +14,7 @@ X_df = df[feature_names]
 X = X_df.to_numpy()
 y = df.Case.to_numpy()
 
-window_len = 200#300
+window_len = 300#300
 
 if window_len:
     n_features = len(feature_names)  # 3

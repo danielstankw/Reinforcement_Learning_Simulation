@@ -596,90 +596,90 @@ class ImpedancePositionBaseControllerPartial(Controller):
             self.kd_impedance = 2 * np.sqrt(self.kp_impedance) * np.sqrt(2)
 
         if self.control_dim == 26:
-            # def rescale(a, low, high):
-            #     """
-            #     Scale action space from [-1,1] : native sb3 to [low, high]
-            #     Args:
-            #         a: action space
-            #         low: lower bound
-            #         high: higher bound
-            #
-            #     Returns: scaled action space
-            #     """
-            #     return low + (0.5 * (a + 1.0) * (high - low))
-            #
-            # k11 = rescale(action[0], 0, 100)
-            # k22 = rescale(action[2], 0, 100)
-            # k33 = rescale(action[4], 0, 100)
-            # k44 = rescale(action[6], 0, 100)
-            # k55 = rescale(action[8], 0, 100)
-            # k66 = rescale(action[9], 0, 100)
-            #
-            # k15 = rescale(action[1], -100, 100)
-            # k24 = rescale(action[3], -100, 100)
-            # k42 = rescale(action[5], -100, 100)
-            # k51 = rescale(action[7], -100, 100)
-            #
-            # self.K = np.array([[k11, 0, 0, 0, k15, 0],
-            #                    [0, k22, 0, k24, 0, 0],
-            #                    [0, 0, k33, 0, 0, 0],
-            #                    [0, k42, 0, k44, 0, 0],
-            #                    [k51, 0, 0, 0, k55, 0],
-            #                    [0, 0, 0, 0, 0, k66]])
-            #
-            # c11 = rescale(action[10], 0, 100)
-            # c22 = rescale(action[12], 0, 100)
-            # c33 = rescale(action[14], 0, 100)
-            # c44 = rescale(action[16], 0, 100)
-            # c55 = rescale(action[18], 0, 100)
-            # c66 = rescale(action[19], 0, 100)
-            #
-            # c15 = rescale(action[11], -100, 100)
-            # c24 = rescale(action[13], -100, 100)
-            # c42 = rescale(action[15], -100, 100)
-            # c51 = rescale(action[17], -100, 100)
-            #
-            # self.C = np.array([[c11, 0, 0, 0, c15, 0],
-            #                    [0, c22, 0, c24, 0, 0],
-            #                    [0, 0, c33, 0, 0, 0],
-            #                    [0, c42, 0, c44, 0, 0],
-            #                    [c51, 0, 0, 0, c55, 0],
-            #                    [0, 0, 0, 0, 0, c66]])
-            #
-            # m11 = rescale(action[20], 0, 50)
-            # m22 = rescale(action[21], 0, 50)
-            # m33 = rescale(action[22], 0, 50)
-            # m44 = rescale(action[23], 0, 50)
-            # m55 = rescale(action[24], 0, 50)
-            # m66 = rescale(action[25], 0, 50)
-            #
-            # self.M = np.array([[m11, 0, 0, 0, 0, 0],
-            #                    [0, m22, 0, 0, 0, 0],
-            #                    [0, 0, m33, 0, 0, 0],
-            #                    [0, 0, 0, m44, 0, 0],
-            #                    [0, 0, 0, 0, m55, 0],
-            #                    [0, 0, 0, 0, 0, m66]])
+            def rescale(a, low, high):
+                """
+                Scale action space from [-1,1] : native sb3 to [low, high]
+                Args:
+                    a: action space
+                    low: lower bound
+                    high: higher bound
 
-            self.K = np.array([[abs(action[0]), 0, 0, 0, action[1], 0],
-                               [0, abs(action[2]), 0, action[3], 0, 0],
-                               [0, 0, abs(action[4]), 0, 0, 0],
-                               [0, action[5], 0, abs(action[6]), 0, 0],
-                               [action[7], 0, 0, 0, abs(action[8]), 0],
-                               [0, 0, 0, 0, 0, abs(action[9])]])
+                Returns: scaled action space
+                """
+                return low + (0.5 * (a + 1.0) * (high - low))
 
-            self.C = np.array([[abs(action[10]), 0, 0, 0, action[11], 0],
-                               [0, abs(action[12]), 0, action[13], 0, 0],
-                               [0, 0, abs(action[14]), 0, 0, 0],
-                               [0, action[15], 0, abs(action[16]), 0, 0],
-                               [action[17], 0, 0, 0, abs(action[18]), 0],
-                               [0, 0, 0, 0, 0, abs(action[19])]])
+            k11 = rescale(action[0], 0, 100)
+            k22 = rescale(action[2], 0, 100)
+            k33 = rescale(action[4], 0, 100)
+            k44 = rescale(action[6], 0, 100)
+            k55 = rescale(action[8], 0, 100)
+            k66 = rescale(action[9], 0, 100)
 
-            self.M = np.array([[abs(action[20]), 0, 0, 0, 0, 0],
-                               [0, abs(action[21]), 0, 0, 0, 0],
-                               [0, 0, abs(action[22]), 0, 0, 0],
-                               [0, 0, 0, abs(action[23]), 0, 0],
-                               [0, 0, 0, 0, abs(action[24]), 0],
-                               [0, 0, 0, 0, 0, abs(action[25])]])
+            k15 = rescale(action[1], -100, 100)
+            k24 = rescale(action[3], -100, 100)
+            k42 = rescale(action[5], -100, 100)
+            k51 = rescale(action[7], -100, 100)
+
+            self.K = np.array([[k11, 0, 0, 0, k15, 0],
+                               [0, k22, 0, k24, 0, 0],
+                               [0, 0, k33, 0, 0, 0],
+                               [0, k42, 0, k44, 0, 0],
+                               [k51, 0, 0, 0, k55, 0],
+                               [0, 0, 0, 0, 0, k66]])
+
+            c11 = rescale(action[10], 0, 100)
+            c22 = rescale(action[12], 0, 100)
+            c33 = rescale(action[14], 0, 100)
+            c44 = rescale(action[16], 0, 100)
+            c55 = rescale(action[18], 0, 100)
+            c66 = rescale(action[19], 0, 100)
+
+            c15 = rescale(action[11], -100, 100)
+            c24 = rescale(action[13], -100, 100)
+            c42 = rescale(action[15], -100, 100)
+            c51 = rescale(action[17], -100, 100)
+
+            self.C = np.array([[c11, 0, 0, 0, c15, 0],
+                               [0, c22, 0, c24, 0, 0],
+                               [0, 0, c33, 0, 0, 0],
+                               [0, c42, 0, c44, 0, 0],
+                               [c51, 0, 0, 0, c55, 0],
+                               [0, 0, 0, 0, 0, c66]])
+
+            m11 = rescale(action[20], 0, 50)
+            m22 = rescale(action[21], 0, 50)
+            m33 = rescale(action[22], 0, 50)
+            m44 = rescale(action[23], 0, 50)
+            m55 = rescale(action[24], 0, 50)
+            m66 = rescale(action[25], 0, 50)
+
+            self.M = np.array([[m11, 0, 0, 0, 0, 0],
+                               [0, m22, 0, 0, 0, 0],
+                               [0, 0, m33, 0, 0, 0],
+                               [0, 0, 0, m44, 0, 0],
+                               [0, 0, 0, 0, m55, 0],
+                               [0, 0, 0, 0, 0, m66]])
+
+            # self.K = np.array([[abs(action[0]), 0, 0, 0, action[1], 0],
+            #                    [0, abs(action[2]), 0, action[3], 0, 0],
+            #                    [0, 0, abs(action[4]), 0, 0, 0],
+            #                    [0, action[5], 0, abs(action[6]), 0, 0],
+            #                    [action[7], 0, 0, 0, abs(action[8]), 0],
+            #                    [0, 0, 0, 0, 0, abs(action[9])]])
+            #
+            # self.C = np.array([[abs(action[10]), 0, 0, 0, action[11], 0],
+            #                    [0, abs(action[12]), 0, action[13], 0, 0],
+            #                    [0, 0, abs(action[14]), 0, 0, 0],
+            #                    [0, action[15], 0, abs(action[16]), 0, 0],
+            #                    [action[17], 0, 0, 0, abs(action[18]), 0],
+            #                    [0, 0, 0, 0, 0, abs(action[19])]])
+            #
+            # self.M = np.array([[abs(action[20]), 0, 0, 0, 0, 0],
+            #                    [0, abs(action[21]), 0, 0, 0, 0],
+            #                    [0, 0, abs(action[22]), 0, 0, 0],
+            #                    [0, 0, 0, abs(action[23]), 0, 0],
+            #                    [0, 0, 0, 0, abs(action[24]), 0],
+            #                    [0, 0, 0, 0, 0, abs(action[25])]])
             #    print('-------------------------K--------------------------------')
             #
 
