@@ -1,45 +1,100 @@
-import time
-
+import tensorflow as tf
+from tensorflow import keras
+from matplotlib import pyplot as plt
 import numpy as np
 import pandas as pd
-from tensorflow import keras
-
-dff1 = pd.read_csv('circle_0.0008.csv')
-dff2 = pd.read_csv('circle_0.0007.csv')
-dff3 = pd.read_csv('circle_0.0006.csv')
-
-# 3-no overlap, 2-overlap but not insert, 1-enough to insert
-# we will combine 3 and 2 into 0 label
-dff1['Case'] = dff1['Case'].replace([3, 2], 0)
-dff2['Case'] = dff2['Case'].replace([3, 2], 0)
-dff3['Case'] = dff3['Case'].replace([3, 2], 0)
-
-t_cont1 = dff1['t_contact'][0]
-t_cont2 = dff2['t_contact'][0]
-t_cont3 = dff3['t_contact'][0]
-
-df1 = dff1[dff1.time > t_cont1]
-df2 = dff2[dff2.time > t_cont2]
-df3 = dff3[dff3.time > t_cont1]
-
-df = pd.concat([df1, df2, df3], ignore_index=True)
+from scipy.linalg import expm
+from copy import deepcopy
+import time
 
 
-# ['time', 'Fx', 'Fy', 'Fz', 'Vx', 'Vy', 'Mx', 'My', 'Case', 't_contact']
-feature_names = ['Fz', 'Mx', 'My']
-
-X = df[feature_names].to_numpy()
-y = df.Case.to_numpy()
+df = pd.read_csv('/home/user/Desktop/ML/robotdatacollection3/ep2.csv')
+model = keras.models.load_model('/home/user/Desktop/ML/Lstm3')
 
 
-model = keras.models.load_model("no_window")
-# self.model = pickle.load(open('RFClassifier.sav', 'rb'))
-threshold_precision = 0.788
+feature_list = ['Fx','Fy','Fz','Mx','My']
+TIMESTEP = 50
 
-t_init = time.time()
-# y_scores = model.predict(X[0].reshape(1, 3))
-temp = np.array([1,2,3]).reshape(1,3)
-y_scores = model.predict(temp)
+thresholds = [0.6633808278609795,
+ 0.7209509613135269,
+ 0.9952639683988141,
+ 0.0811562662243707,
+ 0.1198432341494734]
+def to_sequence(data, timesteps=1):
+    n_features = data.shape[2]
+    seq = []
+    for i in range(len(data) - timesteps):
+        # takes a window of data of specified timesteps
+        temp = data[i:(i + timesteps)]
+        temp = temp.reshape(timesteps, n_features)
+        seq.append(temp)
 
-# y_scores = model.predict(X[0].reshape(1, 3))
-print('time', time.time()-t_init)
+    return np.array(seq)
+
+
+def append_vector(array, vector):
+    # Discard value from the top
+    array.pop(0)
+    # Add new value to the end
+    array.insert(len(array), vector)
+
+    memory = [[0] * len(feature_list) for _ in range(TIMESTEP + 1)]
+    x = df.x.values
+    y = df.y.values
+    z = df.z.values
+    fx = df.Fx.values
+    fy = df.Fy.values
+    fz = df.Fz.values
+    mx = df.Mx.values
+    my = df.My.values
+    mz = df.Mz.values
+    case = df.Case.values
+    cnt = 0
+    j = 0
+    anomalies_list = []
+    thresholds_array = np.array(thresholds)
+
+    anom_idx_list = []
+    t_start = 0
+
+    while cnt <= 5351 - 1:  # 5351-1: #55+5300:
+        features = np.array([fx[cnt], fy[cnt], fz[cnt], mx[cnt], my[cnt]]).tolist()
+        append_vector(memory, features)
+        # after 50 iterations (0-49) the memory buffer is filled and we can use it for predictions
+        # the buffer is structured = [F(0), F(1), F(2)...] and at each iteration the first row is discarded
+        # and new value is added to the end. Latest value at the end, oldest at the beginning.
+
+        if cnt >= TIMESTEP:  # memory buffer has filled up
+            t_start = time.time()
+            print('Loop at: ', cnt)
+            memory_array = np.array(memory)
+            memory_array_expanded = np.expand_dims(memory_array, axis=1)
+            # obtain the memory in sequence form
+            x_test = to_sequence(memory_array_expanded, TIMESTEP)
+            # make prediction using LSTM Autoencoder
+            x_test_pred = model(x_test)
+            # Calculate test Loss
+            print('pred_df',time.time()-t_start)
+            test_mae_loss = np.mean(np.abs(x_test_pred[0] - x_test), axis=1)  # (1, n_feature)
+
+            temp_anomaly = (test_mae_loss > thresholds).tolist()[0]
+
+            # temp_anomaly = [False, True, False...]
+            if any(temp_anomaly) is True:
+                #             print(temp_anomaly)
+                anomaly_idx = [j * anom_idx for anom_idx in temp_anomaly]
+
+                print('Anomaly idx: ', anomaly_idx)
+                unique, counts = np.unique(anomaly_idx, return_counts=True)
+                #             print(unique)
+                #             print(counts)
+                if unique[1] > 0:
+                    if counts[1] >= 2:
+                        break
+                anom_idx_list.append(anomaly_idx)
+
+            j += 1
+        cnt += 1
+
+
+

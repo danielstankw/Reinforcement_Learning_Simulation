@@ -144,10 +144,10 @@ def evaluate(model: "base_class.BaseAlgorithm",
         print(f"Episode number: {i+1},reward: {episode_reward}, sim time: {np.round(_info.get('time'),7)} "
               f"| horizon: {_info.get('horizon')} | real time {_info.get('episode').get('t')} ")
 
-        # my_dict['error'].append(_info.get('error'))
-        # file_name = 'errors.pkl'
-        # with open(file_name, 'wb') as f:
-        #     pickle.dump(my_dict, f)
+        my_dict['error'].append(_info.get('error'))
+        file_name = '100_simulation_errors.pkl'
+        with open(file_name, 'wb') as f:
+            pickle.dump(my_dict, f)
 
     mean_reward = np.mean(episode_rewards)
     std_reward = np.std(episode_rewards)
@@ -180,10 +180,10 @@ if __name__ == "__main__":
     os.makedirs(log_dir_callback, exist_ok=True)
     os.makedirs(log_dir_extras, exist_ok=True)
 
-    plot_graphs = True
-    render = True
-    error_type = "fixed"
-    error_vec = np.array([0.0, -3.7, 0.0])/1000  # in mm
+    plot_graphs = False
+    render = False
+    error_type = "ring"
+    error_vec = np.array([0.0, -3.6, 0.0])/1000  # in mm
     circle_motion = False  # parameters of circle motion are in the controller file
 
     # RANDOMIZATION OF PARAMS
@@ -245,7 +245,7 @@ if __name__ == "__main__":
             fixed_error_vec=error_vec  # mm
         )
     )
-    eval_steps = 1 # how many runs per set of params
+    eval_steps = 100# how many runs per set of params
     mode = 'eval'
 
     env = Monitor(env, log_dir_callback, allow_early_resets=True)

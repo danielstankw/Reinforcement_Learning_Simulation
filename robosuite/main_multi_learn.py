@@ -1,3 +1,4 @@
+import time
 from typing import Callable, List, Optional, Tuple, Union
 import os
 import gym
@@ -31,7 +32,79 @@ def dict_csv(name, dict):
             f.write("%s,%s\n" % (key, dict[key]))
     return
 
+class CheckpointCallback(BaseCallback):
+    """
+    Callback for saving a model every ``save_freq`` calls
+    to ``env.step()``.
+    By default, it only saves model checkpoints,
+    you need to pass ``save_replay_buffer=True``,
+    and ``save_vecnormalize=True`` to also save replay buffer checkpoints
+    and normalization statistics checkpoints.
+    .. warning::
+      When using multiple environments, each call to  ``env.step()``
+      will effectively correspond to ``n_envs`` steps.
+      To account for that, you can use ``save_freq = max(save_freq // n_envs, 1)``
+    :param save_freq: Save checkpoints every ``save_freq`` call of the callback.
+    :param save_path: Path to the folder where the model will be saved.
+    :param name_prefix: Common prefix to the saved models
+    :param save_replay_buffer: Save the model replay buffer
+    :param save_vecnormalize: Save the ``VecNormalize`` statistics
+    :param verbose: Verbosity level: 0 for no output, 2 for indicating when saving model checkpoint
+    """
 
+    def __init__(
+        self,
+        save_freq: int,
+        save_path: str,
+        name_prefix: str = "rl_model",
+        save_replay_buffer: bool = False,
+        save_vecnormalize: bool = False,
+        verbose: int = 0,
+    ):
+        super().__init__(verbose)
+        self.save_freq = save_freq
+        self.save_path = save_path
+        self.name_prefix = name_prefix
+        self.save_replay_buffer = save_replay_buffer
+        self.save_vecnormalize = save_vecnormalize
+
+    def _init_callback(self) -> None:
+        # Create folder if needed
+        if self.save_path is not None:
+            os.makedirs(self.save_path, exist_ok=True)
+
+    def _checkpoint_path(self, checkpoint_type: str = "", extension: str = "") -> str:
+        """
+        Helper to get checkpoint path for each type of checkpoint.
+        :param checkpoint_type: empty for the model, "replay_buffer_"
+            or "vecnormalize_" for the other checkpoints.
+        :param extension: Checkpoint file extension (zip for model, pkl for others)
+        :return: Path to the checkpoint
+        """
+        return os.path.join(self.save_path, f"{self.name_prefix}_{checkpoint_type}{self.num_timesteps}_steps.{extension}")
+
+    def _on_step(self) -> bool:
+        if self.n_calls % self.save_freq == 0:
+            model_path = self._checkpoint_path(extension="zip")
+            self.model.save(model_path)
+            if self.verbose >= 2:
+                print(f"Saving model checkpoint to {model_path}")
+
+            if self.save_replay_buffer and hasattr(self.model, "replay_buffer") and self.model.replay_buffer is not None:
+                # If model has a replay buffer, save it too
+                replay_buffer_path = self._checkpoint_path("replay_buffer_", extension="pkl")
+                self.model.save_replay_buffer(replay_buffer_path)
+                if self.verbose > 1:
+                    print(f"Saving model replay buffer checkpoint to {replay_buffer_path}")
+
+            if self.save_vecnormalize and self.model.get_vec_normalize_env() is not None:
+                # Save the VecNormalize statistics
+                vec_normalize_path = self._checkpoint_path("vecnormalize_", extension="pkl")
+                self.model.get_vec_normalize_env().save(vec_normalize_path)
+                if self.verbose >= 2:
+                    print(f"Saving model VecNormalize to {vec_normalize_path}")
+
+        return True
 class SaveOnBestTrainingRewardCallback(BaseCallback):
     """
     Callback for saving a model (the check is done every ``check_freq`` steps)
@@ -209,9 +282,11 @@ def seed_initializer():
 
 if __name__ == "__main__":
     # Create log dir
-    log_dir = 'daniel_n8_sim/sim13_n8/robosuite/'
+    log_dir = './robosuite/'
     log_dir_extras = os.path.join(log_dir, 'extras')
     log_dir_callback = os.path.join(log_dir, 'callback')
+    log_dir_checkpoint = os.path.join(log_dir, 'checkpoint')
+    os.makedirs(log_dir_checkpoint, exist_ok=True)
     os.makedirs(log_dir_callback, exist_ok=True)
     os.makedirs(log_dir_extras, exist_ok=True)
 
@@ -258,8 +333,8 @@ if __name__ == "__main__":
     mini_buffer = 20
     seed_val = 2
     num_proc = 10
-    learning_steps = 20_000
-    seed = seed_initializer()
+    learning_steps = 10_000
+    seed = 4#  seed_initializer()
     # seed = 4
     assert mini_buffer >= num_proc, f"Number of mini_buffer >= num_proc, but is n_step:{mini_buffer}, num_proc: {num_proc}"
 
@@ -269,6 +344,16 @@ if __name__ == "__main__":
 
     # rollout buffer size = n_steps * num_proc
     reward_callback = SaveOnBestTrainingRewardCallback(mean_eps=20, check_freq=n_call, log_dir=log_dir_callback)
+    # Each call to env.step() will effectively correspond to n_envs steps.
+    checkpoint_callback_ever_eps = 500
+    checkpoint_freq = int(checkpoint_callback_ever_eps / num_proc)
+    checkpoint_callback = CheckpointCallback(
+        save_freq=checkpoint_freq,
+        save_path=log_dir_checkpoint,
+        name_prefix="model",
+        save_replay_buffer=True,
+        save_vecnormalize=True,
+        verbose=2)
     env = SubprocVecEnv([make_robosuite_env(env_id, env_options, i, seed_val) for i in range(num_proc)])
 
     policy_kwargs = dict(activation_fn=torch.nn.LeakyReLU, net_arch=[32, 32])
@@ -276,10 +361,11 @@ if __name__ == "__main__":
                 tensorboard_log="./learning_log/ppo_tensorboard/", seed=seed)
 
     model_info_collect(model=model)
-
-    model.learn(total_timesteps=learning_steps, tb_log_name="learning", callback=reward_callback)
-    model.save('MUltiTest.zip')
+    t_start = time.time()
+    model.learn(total_timesteps=learning_steps, tb_log_name="learning", callback=[reward_callback, checkpoint_callback])
+    model.save('final13.zip')
     print("Model Saved")
+    print('Total learning time:', time.time()-t_start)
     #
     # print('Training Continuation')
     # model = PPO.load("./daniel_n8_sim/sim7_n8/Multiprocess_32_32_nstep_20_pd_lear.zip",

@@ -18,7 +18,79 @@ import torch
 import robosuite as suite
 from robosuite.wrappers import GymWrapper
 
+class CheckpointCallback(BaseCallback):
+    """
+    Callback for saving a model every ``save_freq`` calls
+    to ``env.step()``.
+    By default, it only saves model checkpoints,
+    you need to pass ``save_replay_buffer=True``,
+    and ``save_vecnormalize=True`` to also save replay buffer checkpoints
+    and normalization statistics checkpoints.
+    .. warning::
+      When using multiple environments, each call to  ``env.step()``
+      will effectively correspond to ``n_envs`` steps.
+      To account for that, you can use ``save_freq = max(save_freq // n_envs, 1)``
+    :param save_freq: Save checkpoints every ``save_freq`` call of the callback.
+    :param save_path: Path to the folder where the model will be saved.
+    :param name_prefix: Common prefix to the saved models
+    :param save_replay_buffer: Save the model replay buffer
+    :param save_vecnormalize: Save the ``VecNormalize`` statistics
+    :param verbose: Verbosity level: 0 for no output, 2 for indicating when saving model checkpoint
+    """
 
+    def __init__(
+        self,
+        save_freq: int,
+        save_path: str,
+        name_prefix: str = "rl_model",
+        save_replay_buffer: bool = False,
+        save_vecnormalize: bool = False,
+        verbose: int = 0,
+    ):
+        super().__init__(verbose)
+        self.save_freq = save_freq
+        self.save_path = save_path
+        self.name_prefix = name_prefix
+        self.save_replay_buffer = save_replay_buffer
+        self.save_vecnormalize = save_vecnormalize
+
+    def _init_callback(self) -> None:
+        # Create folder if needed
+        if self.save_path is not None:
+            os.makedirs(self.save_path, exist_ok=True)
+
+    def _checkpoint_path(self, checkpoint_type: str = "", extension: str = "") -> str:
+        """
+        Helper to get checkpoint path for each type of checkpoint.
+        :param checkpoint_type: empty for the model, "replay_buffer_"
+            or "vecnormalize_" for the other checkpoints.
+        :param extension: Checkpoint file extension (zip for model, pkl for others)
+        :return: Path to the checkpoint
+        """
+        return os.path.join(self.save_path, f"{self.name_prefix}_{checkpoint_type}{self.num_timesteps}_steps.{extension}")
+
+    def _on_step(self) -> bool:
+        if self.n_calls % self.save_freq == 0:
+            model_path = self._checkpoint_path(extension="zip")
+            self.model.save(model_path)
+            if self.verbose >= 2:
+                print(f"Saving model checkpoint to {model_path}")
+
+            if self.save_replay_buffer and hasattr(self.model, "replay_buffer") and self.model.replay_buffer is not None:
+                # If model has a replay buffer, save it too
+                replay_buffer_path = self._checkpoint_path("replay_buffer_", extension="pkl")
+                self.model.save_replay_buffer(replay_buffer_path)
+                if self.verbose > 1:
+                    print(f"Saving model replay buffer checkpoint to {replay_buffer_path}")
+
+            if self.save_vecnormalize and self.model.get_vec_normalize_env() is not None:
+                # Save the VecNormalize statistics
+                vec_normalize_path = self._checkpoint_path("vecnormalize_", extension="pkl")
+                self.model.get_vec_normalize_env().save(vec_normalize_path)
+                if self.verbose >= 2:
+                    print(f"Saving model VecNormalize to {vec_normalize_path}")
+
+        return True
 class SaveOnBestTrainingRewardCallback(BaseCallback):
     """
     Callback for saving a model (the check is done every ``check_freq`` steps)
@@ -139,10 +211,10 @@ def evaluate(model: "base_class.BaseAlgorithm",
         print(f"Episode number: {i+1},reward: {episode_reward}, sim time: {np.round(_info.get('time'),7)} "
               f"| horizon: {_info.get('horizon')} | real time {_info.get('episode').get('t')} ")
 
-        my_dict['success'].append(_info.get('is_success'))
-        my_dict['error'].append(_info.get('error'))
-        #
-        # file_name = 'daniel_n8_sim/sim15_n8/scaled_error.pkl'
+        # my_dict['success'].append(_info.get('is_success'))
+        # my_dict['error'].append(_info.get('error'))
+        # #
+        # file_name = 'xgboost_error.pkl'
         # with open(file_name, 'wb') as f:
         #     pickle.dump(my_dict, f)
     mean_reward = np.mean(episode_rewards)
@@ -194,42 +266,37 @@ def model_info_collect(model):
 
 if __name__ == "__main__":
     # Create log dir
-    log_dir = 'daniel_n8_sim/sim15_n8/robosuite/'
+    log_dir = './robosuite/'
     log_dir_extras = os.path.join(log_dir, 'extras')
     log_dir_callback = os.path.join(log_dir, 'callback')
+    log_dir_checkpoint = os.path.join(log_dir, 'checkpoint')
+    os.makedirs(log_dir_checkpoint, exist_ok=True)
     os.makedirs(log_dir_callback, exist_ok=True)
     os.makedirs(log_dir_extras, exist_ok=True)
 
     """To collect data: use_spiral=True/ use_ml=False"""
     use_spiral = False
     use_ml = False
-    threshold = 0.5
+    threshold = 0.8
     use_impedance = True  # or pd
     plot_graphs = True
-    render = True
+    render = False
     error_type = "fixed"
-    error_vec = np.array([3.3, 0.0, 0.0]) / 1000 # in mm
-    overlap_wait_time = 0.0
+    error_vec = np.array([4.2, 0.0, 0.0]) / 1000 # in mm
+    overlap_wait_time = 2.0
     circle_motion = False  # parameters of circle motion are in the controller file
 
 
     # #
 # shir
-    total_sim_time = 25 + 60 #+ 90#40#  25 #+ 10
+    total_sim_time = 90#25#5 #90#25
     time_free_space = 2.5
     time_insertion = 13.5
-# daniel - long
-    # total_sim_time = 35.0
-    # time_free_space = 5
-    # time_insertion = 25.0
-# elad
-#     total_sim_time = 15.0
-#     time_free_space = 5.0
-#     time_insertion = 4.0
+
     time_impedance = total_sim_time - (time_free_space + time_insertion)
 
     control_freq = 20
-    control_dim = 26 # 38 # 32
+    control_dim = 26#26 # 38 # 32
     horizon = total_sim_time * control_freq
 
     if use_spiral:
@@ -272,17 +339,24 @@ if __name__ == "__main__":
             fixed_error_vec=error_vec  # mm
         )
     )
-    eval_steps = 50
-    learning_steps = 10000
+    eval_steps = 1
+    learning_steps = 20_000
     # seed = 4
     seed = seed_initializer()
-    mode = 'eval'
+    mode = 'new_train'
     # mode = 'eval'
     # mode = 'continue_train'
 
     env = Monitor(env, log_dir_callback, allow_early_resets=True)
     # Create the callback: check every check_freq steps
     reward_callback = SaveOnBestTrainingRewardCallback(mean_eps=100, check_freq=200, log_dir=log_dir_callback)
+    checkpoint_callback = CheckpointCallback(
+        save_freq=500,
+        save_path=log_dir_checkpoint,
+        name_prefix="model",
+        save_replay_buffer=True,
+        save_vecnormalize=True,
+        verbose=2)
 
     if mode == 'new_train':
         print('Training New Model')
@@ -294,14 +368,18 @@ if __name__ == "__main__":
 
         model_info_collect(model=model)
 
-        model.learn(total_timesteps=learning_steps, tb_log_name="learning", callback=reward_callback)
+        model.learn(total_timesteps=learning_steps, tb_log_name="learning", callback=[reward_callback, checkpoint_callback])
         print("------------ Done Training -------------")
-        model.save('new_scaled.zip')
+        model.save('new_model.zip')
 
     if mode == 'eval':
         print('Evaluating Model')
         # model = PPO.load("./daniel_n8_sim/sim11_n8/robosuite/callback/best_model_callback.zip", verbose=1, env=env)
-        model = PPO.load("./daniel_n8_sim/sim15_n8/robosuite/callback/best_model_callback.zip", verbose=1, env=env) # requires rescale
+        # model = PPO.load("./daniel_n8_sim/sim15_n8/robosuite/callback/best_model_callback.zip", verbose=1, env=env) # requires rescale
+        # model = PPO.load("./daniel_n8_sim/sim16_n8/robosuite/callback/best_model_callback.zip", verbose=1, env=env) # requires rescale
+        # model = PPO.load("./daniel_learning_runs/run5/final5_constHolePos_HoleObs_10proc_scale_changedZWrench.zip", verbose=1, env=env)  # requires rescale
+        # model = PPO.load("./daniel_learning_runs/run7/robosuite/callback/best_model_callback.zip", verbose=1, env=env)  # requires rescale
+        model = PPO.load("./daniel_sim_results/daniel_original_benchmark/Daniel_n5_banchmark_single.zip", verbose=1, env=env)  # requires rescale
 
     if mode == 'continue_train':
         print('Training Continuation')

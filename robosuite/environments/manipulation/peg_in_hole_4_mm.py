@@ -393,6 +393,9 @@ class PegInHoleSmall(SingleArmEnv):
 
             # position and rotation of peg and hole
             @sensor(modality=modality)
+            def constant(obs_cache):
+                return np.ones((3,))
+            @sensor(modality=modality)
             def hole_pos(obs_cache):
                 return np.array(self.sim.data.body_xpos[self.hole_body_id])
 
@@ -425,7 +428,7 @@ class PegInHoleSmall(SingleArmEnv):
             def d(obs_cache):
                 return obs_cache["d"] if "d" in obs_cache else 0.0
 
-            sensors = [hole_pos]
+            sensors = [hole_pos] # constant
             names = [s.__name__ for s in sensors]
 
             # Create observables
@@ -460,7 +463,7 @@ class PegInHoleSmall(SingleArmEnv):
         """
         # Elad: enable visualization of environments objects sites:
         # If you dont wont to display environments site's uncomment this or set "vis_settings['env']" to "False"
-        vis_settings['env'] = True
+        vis_settings['env'] = False
         # Run superclass method first
         super().visualize(vis_settings=vis_settings)
 
@@ -561,8 +564,8 @@ class PegInHoleSmall(SingleArmEnv):
             # trans_error = np.array([7.14533037e-04, -5.01936469e-04, 8.95959506e-01])
             trans_error = self.fixed_error_vec  # fixed error
         if self.error_type == 'ring':
-            r_low = 0.6 / 1000#3.3/1000 #0.6 / 1000
-            r_high = 0.8 / 1000# 3.9/1000 #.8 / 1000
+            r_low = 4.8 / 1000  # 3.3 / 1000
+            r_high = 4.8 / 1000  # 3.9 / 1000
             r = random.uniform(r_low, r_high)
             theta = random.uniform(0, 2 * np.pi)
             x_error = r * np.cos(theta)
@@ -574,7 +577,7 @@ class PegInHoleSmall(SingleArmEnv):
             x_error = random.uniform(0.002, self.dist_error) * 5.1  # -1,1,0
             y_error = random.uniform(0.0012, self.dist_error) * 0  # -1,1,0
             trans_error = np.array([x_error, y_error, 0])
-        # print(trans_error)
+        print('Error used', np.round(trans_error, 6))
         trans_error[2] = 0
         # print()
         self.error = deepcopy(trans_error)

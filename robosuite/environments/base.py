@@ -455,7 +455,8 @@ class MujocoEnv(metaclass=EnvMeta):
         #                    'Fy': self.robots[0].controller.sensor_fy, 'Fz': self.robots[0].controller.sensor_fz, 'Mx': self.robots[0].controller.sensor_mx,
         #                    'My': self.robots[0].controller.sensor_my, 'Mz': self.robots[0].controller.sensor_mz, 'Case': self.robots[0].controller.zones})
         # filename = "ep" + str(int(action[0])) + ".csv"
-        # filepath = os.path.join('/home/user/Desktop/Simulation_n5/robosuite/data_collection4', filename)
+        # # filename='ep1.csv'
+        # filepath = os.path.join('/home/user/Desktop/Daniel_simulation/robosuite/data_collection', filename)
         # df.to_csv(filepath)
 
         if self.success >= SUCCESS_STEPS:

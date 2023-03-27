@@ -350,9 +350,10 @@ class ImpedancePositionBaseControllerPartial(Controller):
                 # self.kp = deepcopy(np.clip(self.kp_impedance, self.kp_min, self.kp_max))
                 # self.kd = deepcopy(np.clip(self.kd_impedance, 0.0, 4 * 2 * np.sqrt(self.kp) * np.sqrt(2)))
 
-                self.kp = np.array([15000.0, 15000.0, 250.0, 450.0, 450.0, 450.0])
-                self.kd = 2 * np.sqrt(self.kp) * np.sqrt(2)
-                # self.kp = np.array([700., 500., 100., 450., 450., 450.])
+                # self.kp = np.array([15000.0, 15000.0, 250.0, 450.0, 450.0, 450.0])
+                # self.kd = 2 * np.sqrt(self.kp) * np.sqrt(2)
+                self.kp = np.array([700.0, 700.0, 200.0, 50.0, 50.0, 50.0])
+                self.kd = 2 * np.sqrt(self.kp) * 0.707
                 # self.kd = np.array([74.83314774, 63.2455532, 28.28427125, 30., 30., 30.])
                 # # good spiral
                 # self.kp = np.array([700., 500., 10., 450., 450., 450.])
@@ -373,24 +374,21 @@ class ImpedancePositionBaseControllerPartial(Controller):
             axis=0) - self.ee_sensor_bias)
 
         ori_real = T.Rotation_Matrix_To_Vector(self.final_orientation, self.ee_ori_mat)
+        # error calculation
         ori_error = self.desired_pos[3:6] - ori_real
-
         vel_ori_error = self.desired_pos[9:12] - self.ee_ori_vel
-
-        # Compute desired force and torque based on errors
         position_error = self.desired_pos[:3].T - self.ee_pos
         vel_pos_error = self.desired_pos[6:9].T - self.ee_pos_vel
-        # print(self.sim.data.time)
-        # PD controller
-        # print('kp', self.kp)
-        # print('kd', self.kd)
 
+        # Compute desired force and torque based on errors
         desired_force = (np.multiply(np.array(position_error), np.array(self.kp[0:3]))
                          + np.multiply(vel_pos_error, self.kd[0:3]))
 
         desired_torque = (np.multiply(np.array(ori_error), np.array(self.kp[3:6]))
                           + np.multiply(vel_ori_error, self.kd[3:6]))
 
+        # if self.contact_flag:
+        #     desired_force[2] = -5
         decoupled_wrench = np.concatenate([desired_force, desired_torque])
         self.torques = np.dot(self.J_full.T, decoupled_wrench).reshape(6, ) + self.torque_compensation
 
@@ -546,140 +544,130 @@ class ImpedancePositionBaseControllerPartial(Controller):
         return X_nex.reshape(12, )
 
     def set_control_param(self, action):
+        if self.control_dim == 30:
+            self.K = np.array([[abs(action[0]), 0, 0, 0, action[1], 0],
+                               [0, abs(action[2]), 0, action[3], 0, 0],
+                               [0, 0, abs(action[4]), 0, 0, 0],
+                               [0, action[5], 0, abs(action[6]), 0, 0],
+                               [action[7], 0, 0, 0, abs(action[8]), 0],
+                               [0, 0, 0, 0, 0, abs(action[9])]])
 
-        if self.control_dim == 36:
-            self.K = np.array([[action[0], 0, 0, 0, action[1], 0],
-                               [0, action[2], 0, action[3], 0, 0],
-                               [0, 0, action[4], 0, 0, 0],
-                               [0, action[5], 0, action[6], 0, 0],
-                               [action[7], 0, 0, 0, action[8], 0],
-                               [0, 0, 0, 0, 0, action[9]]])
+            self.C = np.array([[abs(action[10]), 0, 0, 0, action[11], 0],
+                               [0, abs(action[12]), 0, action[13], 0, 0],
+                               [0, 0, abs(action[14]), 0, 0, 0],
+                               [0, action[15], 0, abs(action[16]), 0, 0],
+                               [action[17], 0, 0, 0, abs(action[18]), 0],
+                               [0, 0, 0, 0, 0, abs(action[19])]])
 
-            self.C = np.array([[action[10], 0, 0, 0, action[11], 0],
-                               [0, action[12], 0, action[13], 0, 0],
-                               [0, 0, action[14], 0, 0, 0],
-                               [0, action[15], 0, action[16], 0, 0],
-                               [action[17], 0, 0, 0, action[18], 0],
-                               [0, 0, 0, 0, 0, action[19]]])
+            self.M = np.array([[abs(action[20]), 0, 0, 0, action[21], 0],
+                               [0, abs(action[22]), 0, action[23], 0, 0],
+                               [0, 0, abs(action[24]), 0, 0, 0],
+                               [0, action[25], 0, abs(action[26]), 0, 0],
+                               [action[27], 0, 0, 0, abs(action[28]), 0],
+                               [0, 0, 0, 0, 0, abs(action[29])]])
 
-            self.M = np.array([[action[20], 0, 0, 0, action[21], 0],
-                               [0, action[22], 0, action[23], 0, 0],
-                               [0, 0, action[24], 0, 0, 0],
-                               [0, action[25], 0, action[26], 0, 0],
-                               [action[27], 0, 0, 0, action[28], 0],
-                               [0, 0, 0, 0, 0, action[29]]])
-            self.kp_impedance = action[-6:]
-
-        if self.control_dim == 24:
-            self.K = np.array([[action[0], 0, 0, 0, 0, 0],
-                               [0, action[1], 0, 0, 0, 0],
-                               [0, 0, action[2], 0, 0, 0],
-                               [0, 0, 0, action[3], 0, 0],
-                               [0, 0, 0, 0, action[4], 0],
-                               [0, 0, 0, 0, 0, action[5]]])
-
-            self.C = np.array([[action[6], 0, 0, 0, 0, 0],
-                               [0, action[7], 0, 0, 0, 0],
-                               [0, 0, action[8], 0, 0, 0],
-                               [0, 0, 0, action[9], 0, 0],
-                               [0, 0, 0, 0, action[10], 0],
-                               [0, 0, 0, 0, 0, action[11]]])
-
-            self.M = np.array([[action[12], 0, 0, 0, 0, 0],
-                               [0, action[13], 0, 0, 0, 0],
-                               [0, 0, action[14], 0, 0, 0],
-                               [0, 0, 0, action[15], 0, 0],
-                               [0, 0, 0, 0, action[16], 0],
-                               [0, 0, 0, 0, 0, action[17]]])
-
-            self.kp_impedance = action[-6:]
-            self.kd_impedance = 2 * np.sqrt(self.kp_impedance) * np.sqrt(2)
 
         if self.control_dim == 26:
-            def rescale(a, low, high):
-                """
-                Scale action space from [-1,1] : native sb3 to [low, high]
-                Args:
-                    a: action space
-                    low: lower bound
-                    high: higher bound
+            use_scaling = False
+            if use_scaling:
+                def rescale(a, low, high):
+                    """
+                    Scale action space from [-2,2] : native sb3 to [low, high]
+                    Args:
+                        a: action space
+                        low: lower bound
+                        high: higher bound
 
-                Returns: scaled action space
-                """
-                return low + (0.5 * (a + 1.0) * (high - low))
+                    Returns: scaled action space
+                    """
+                    # return ((a + 2) / 4) * (high - low) + low
+                    return low + (0.5 * (a + 1.0) * (high - low))
 
-            k11 = rescale(action[0], 0, 100)
-            k22 = rescale(action[2], 0, 100)
-            k33 = rescale(action[4], 0, 100)
-            k44 = rescale(action[6], 0, 100)
-            k55 = rescale(action[8], 0, 100)
-            k66 = rescale(action[9], 0, 100)
+                k_diag = 400
+                k11 = rescale(action[0], 0, k_diag)
+                k22 = rescale(action[2], 0, k_diag)
+                k33 = rescale(action[4], 0, k_diag)
+                k44 = rescale(action[6], 0, k_diag)
+                k55 = rescale(action[8], 0, k_diag)
+                k66 = rescale(action[9], 0, k_diag)
 
-            k15 = rescale(action[1], -100, 100)
-            k24 = rescale(action[3], -100, 100)
-            k42 = rescale(action[5], -100, 100)
-            k51 = rescale(action[7], -100, 100)
+                k_off = 400
+                k15 = rescale(action[1], -k_off, k_off)
+                k24 = rescale(action[3], -k_off, k_off)
+                k42 = rescale(action[5], -k_off, k_off)
+                k51 = rescale(action[7], -k_off, k_off)
 
-            self.K = np.array([[k11, 0, 0, 0, k15, 0],
-                               [0, k22, 0, k24, 0, 0],
-                               [0, 0, k33, 0, 0, 0],
-                               [0, k42, 0, k44, 0, 0],
-                               [k51, 0, 0, 0, k55, 0],
-                               [0, 0, 0, 0, 0, k66]])
+                self.K = np.array([[k11, 0, 0, 0, k15, 0],
+                                   [0, k22, 0, k24, 0, 0],
+                                   [0, 0, k33, 0, 0, 0],
+                                   [0, k42, 0, k44, 0, 0],
+                                   [k51, 0, 0, 0, k55, 0],
+                                   [0, 0, 0, 0, 0, k66]])
 
-            c11 = rescale(action[10], 0, 50)
-            c22 = rescale(action[12], 0, 50)
-            c33 = rescale(action[14], 0, 50)
-            c44 = rescale(action[16], 0, 50)
-            c55 = rescale(action[18], 0, 50)
-            c66 = rescale(action[19], 0, 50)
+                c_diag = 200
+                c11 = rescale(action[10], 0, c_diag)
+                c22 = rescale(action[12], 0, c_diag)
+                c33 = rescale(action[14], 0, c_diag)
+                c44 = rescale(action[16], 0, c_diag)
+                c55 = rescale(action[18], 0, c_diag)
+                c66 = rescale(action[19], 0, c_diag)
 
-            c15 = rescale(action[11], -50, 50)
-            c24 = rescale(action[13], -50, 50)
-            c42 = rescale(action[15], -50, 50)
-            c51 = rescale(action[17], -50, 50)
+                c_off = 200
+                c15 = rescale(action[11], -c_off, c_off)
+                c24 = rescale(action[13], -c_off, c_off)
+                c42 = rescale(action[15], -c_off, c_off)
+                c51 = rescale(action[17], -c_off, c_off)
 
-            self.C = np.array([[c11, 0, 0, 0, c15, 0],
-                               [0, c22, 0, c24, 0, 0],
-                               [0, 0, c33, 0, 0, 0],
-                               [0, c42, 0, c44, 0, 0],
-                               [c51, 0, 0, 0, c55, 0],
-                               [0, 0, 0, 0, 0, c66]])
+                self.C = np.array([[c11, 0, 0, 0, c15, 0],
+                                   [0, c22, 0, c24, 0, 0],
+                                   [0, 0, c33, 0, 0, 0],
+                                   [0, c42, 0, c44, 0, 0],
+                                   [c51, 0, 0, 0, c55, 0],
+                                   [0, 0, 0, 0, 0, c66]])
 
-            m11 = rescale(action[20], 0, 10)
-            m22 = rescale(action[21], 0, 10)
-            m33 = rescale(action[22], 0, 10)
-            m44 = rescale(action[23], 0, 10)
-            m55 = rescale(action[24], 0, 10)
-            m66 = rescale(action[25], 0, 10)
+                m_diag = 1
+                m11 = rescale(action[20], 0, m_diag)
+                m22 = rescale(action[21], 0, m_diag)
+                m33 = rescale(action[22], 0, m_diag)
+                m44 = rescale(action[23], 0, m_diag)
+                m55 = rescale(action[24], 0, m_diag)
+                m66 = rescale(action[25], 0, m_diag)
 
-            self.M = np.array([[m11, 0, 0, 0, 0, 0],
-                               [0, m22, 0, 0, 0, 0],
-                               [0, 0, m33, 0, 0, 0],
-                               [0, 0, 0, m44, 0, 0],
-                               [0, 0, 0, 0, m55, 0],
-                               [0, 0, 0, 0, 0, m66]])
+                self.M = np.array([[m11, 0, 0, 0, 0, 0],
+                                   [0, m22, 0, 0, 0, 0],
+                                   [0, 0, m33, 0, 0, 0],
+                                   [0, 0, 0, m44, 0, 0],
+                                   [0, 0, 0, 0, m55, 0],
+                                   [0, 0, 0, 0, 0, m66]])
+            else:
+                #
+                self.K = np.loadtxt('/home/user/Desktop/Daniel_simulation/robosuite/daniel_learning_runs/run10/action/K.csv',
+                                    delimiter=',')
+                self.C = np.loadtxt('/home/user/Desktop/Daniel_simulation/robosuite/daniel_learning_runs/run10/action/C.csv',
+                                    delimiter=',')
+                self.M = np.loadtxt('/home/user/Desktop/Daniel_simulation/robosuite/daniel_learning_runs/run10/action/M.csv',
+                                    delimiter=',')
 
-            # self.K = np.array([[abs(action[0]), 0, 0, 0, action[1], 0],
-            #                    [0, abs(action[2]), 0, action[3], 0, 0],
-            #                    [0, 0, abs(action[4]), 0, 0, 0],
-            #                    [0, action[5], 0, abs(action[6]), 0, 0],
-            #                    [action[7], 0, 0, 0, abs(action[8]), 0],
-            #                    [0, 0, 0, 0, 0, abs(action[9])]])
-            #
-            # self.C = np.array([[abs(action[10]), 0, 0, 0, action[11], 0],
-            #                    [0, abs(action[12]), 0, action[13], 0, 0],
-            #                    [0, 0, abs(action[14]), 0, 0, 0],
-            #                    [0, action[15], 0, abs(action[16]), 0, 0],
-            #                    [action[17], 0, 0, 0, abs(action[18]), 0],
-            #                    [0, 0, 0, 0, 0, abs(action[19])]])
-            #
-            # self.M = np.array([[abs(action[20]), 0, 0, 0, 0, 0],
-            #                    [0, abs(action[21]), 0, 0, 0, 0],
-            #                    [0, 0, abs(action[22]), 0, 0, 0],
-            #                    [0, 0, 0, abs(action[23]), 0, 0],
-            #                    [0, 0, 0, 0, abs(action[24]), 0],
-            #                    [0, 0, 0, 0, 0, abs(action[25])]])
+                # self.K = np.array([[abs(action[0]), 0, 0, 0, action[1], 0],
+                #                    [0, abs(action[2]), 0, action[3], 0, 0],
+                #                    [0, 0, abs(action[4]), 0, 0, 0],
+                #                    [0, action[5], 0, abs(action[6]), 0, 0],
+                #                    [action[7], 0, 0, 0, abs(action[8]), 0],
+                #                    [0, 0, 0, 0, 0, abs(action[9])]])
+                #
+                # self.C = np.array([[abs(action[10]), 0, 0, 0, action[11], 0],
+                #                    [0, abs(action[12]), 0, action[13], 0, 0],
+                #                    [0, 0, abs(action[14]), 0, 0, 0],
+                #                    [0, action[15], 0, abs(action[16]), 0, 0],
+                #                    [action[17], 0, 0, 0, abs(action[18]), 0],
+                #                    [0, 0, 0, 0, 0, abs(action[19])]])
+                #
+                # self.M = np.array([[abs(action[20]), 0, 0, 0, 0, 0],
+                #                    [0, abs(action[21]), 0, 0, 0, 0],
+                #                    [0, 0, abs(action[22]), 0, 0, 0],
+                #                    [0, 0, 0, abs(action[23]), 0, 0],
+                #                    [0, 0, 0, 0, abs(action[24]), 0],
+                #                    [0, 0, 0, 0, 0, abs(action[25])]])
             #    print('-------------------------K--------------------------------')
             #
 
@@ -707,94 +695,8 @@ class ImpedancePositionBaseControllerPartial(Controller):
             # self.kd_impedance = 2 * np.sqrt(self.kp_impedance) * np.sqrt(2)
             # self.kd_impedance[3:] = 30
 
-        if self.control_dim == 32:
-            self.K = np.array([[abs(action[0]), 0, 0, 0, action[1], 0],
-                               [0, abs(action[2]), 0, action[3], 0, 0],
-                               [0, 0, abs(action[4]), 0, 0, 0],
-                               [0, action[5], 0, abs(action[6]), 0, 0],
-                               [action[7], 0, 0, 0, abs(action[8]), 0],
-                               [0, 0, 0, 0, 0, abs(action[9])]])
 
-            self.C = np.array([[abs(action[10]), 0, 0, 0, action[11], 0],
-                               [0, abs(action[12]), 0, action[13], 0, 0],
-                               [0, 0, abs(action[14]), 0, 0, 0],
-                               [0, action[15], 0, abs(action[16]), 0, 0],
-                               [action[17], 0, 0, 0, abs(action[18]), 0],
-                               [0, 0, 0, 0, 0, abs(action[19])]])
-
-            self.M = np.array([[abs(action[20]), 0, 0, 0, 0, 0],
-                               [0, abs(action[21]), 0, 0, 0, 0],
-                               [0, 0, abs(action[22]), 0, 0, 0],
-                               [0, 0, 0, abs(action[23]), 0, 0],
-                               [0, 0, 0, 0, abs(action[24]), 0],
-                               [0, 0, 0, 0, 0, abs(action[25])]])
-
-            self.kp_impedance = np.abs(action[26:32])
-            self.kd_impedance = 2 * np.sqrt(self.kp_impedance) * np.sqrt(2)
-
-        if self.control_dim == 38:
-            self.K = np.array([[abs(action[0]), 0, 0, 0, action[1], 0],
-                               [0, abs(action[2]), 0, action[3], 0, 0],
-                               [0, 0, abs(action[4]), 0, 0, 0],
-                               [0, action[5], 0, abs(action[6]), 0, 0],
-                               [action[7], 0, 0, 0, abs(action[8]), 0],
-                               [0, 0, 0, 0, 0, abs(action[9])]])
-
-            self.C = np.array([[abs(action[10]), 0, 0, 0, action[11], 0],
-                               [0, abs(action[12]), 0, action[13], 0, 0],
-                               [0, 0, abs(action[14]), 0, 0, 0],
-                               [0, action[15], 0, abs(action[16]), 0, 0],
-                               [action[17], 0, 0, 0, abs(action[18]), 0],
-                               [0, 0, 0, 0, 0, abs(action[19])]])
-
-            self.M = np.array([[abs(action[20]), 0, 0, 0, 0, 0],
-                               [0, abs(action[21]), 0, 0, 0, 0],
-                               [0, 0, abs(action[22]), 0, 0, 0],
-                               [0, 0, 0, abs(action[23]), 0, 0],
-                               [0, 0, 0, 0, abs(action[24]), 0],
-                               [0, 0, 0, 0, 0, abs(action[25])]])
-
-            self.kp_impedance = np.abs(action[26:32])
-            self.kd_impedance = np.abs(action[32:38])
-
-            print('-------------------------K--------------------------------')
-            print(self.K)
-            print('-------------------------C--------------------------------')
-            print(self.C)
-            print('-------------------------M--------------------------------')
-            print(self.M)
-            print('-------------------------kp--------------------------------')
-            print(self.kp_impedance)
-            print('-------------------------kd--------------------------------')
-            print(self.kd_impedance)
-
-        if self.control_dim == 18:
-            self.K = np.array([[abs(action[0]), 0, 0, 0, 0, 0],
-                               [0, abs(action[1]), 0, 0, 0, 0],
-                               [0, 0, abs(action[2]), 0, 0, 0],
-                               [0, 0, 0, abs(action[3]), 0, 0],
-                               [0, 0, 0, 0, abs(action[4]), 0],
-                               [0, 0, 0, 0, 0, abs(action[5])]])
-
-            self.C = np.array([[abs(action[6]), 0, 0, 0, 0, 0],
-                               [0, abs(action[7]), 0, 0, 0, 0],
-                               [0, 0, abs(action[8]), 0, 0, 0],
-                               [0, 0, 0, abs(action[9]), 0, 0],
-                               [0, 0, 0, 0, abs(action[10]), 0],
-                               [0, 0, 0, 0, 0, abs(action[11])]])
-
-            self.M = np.array([[abs(action[12]), 0, 0, 0, 0, 0],
-                               [0, abs(action[13]), 0, 0, 0, 0],
-                               [0, 0, abs(action[14]), 0, 0, 0],
-                               [0, 0, 0, abs(action[15]), 0, 0],
-                               [0, 0, 0, 0, abs(action[16]), 0],
-                               [0, 0, 0, 0, 0, abs(action[17])]])
-
-            self.kp_impedance = np.array([700., 500., 100., 450., 450., 450.])
-            self.kd_impedance = 2 * np.sqrt(self.kp_impedance) * np.sqrt(2)
-            self.kd_impedance[3:] = 30
-
-        self.show_params = False
+        self.show_params = True
         if self.show_params:
             print('-------------------------K--------------------------------')
             print(self.K)
@@ -807,6 +709,7 @@ class ImpedancePositionBaseControllerPartial(Controller):
             # np.savetxt('K.csv', self.K, delimiter=',')
             # np.savetxt('C.csv', self.C, delimiter=',')
             # np.savetxt('M.csv', self.M, delimiter=',')
+            # print()
 
 
     def find_contacts(self):

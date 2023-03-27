@@ -757,3 +757,4 @@ class ImpedanceSpiralMeasurements(Controller):
             return True
         else:
             return False
+
