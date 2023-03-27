@@ -641,11 +641,11 @@ class ImpedancePositionBaseControllerPartial(Controller):
                                    [0, 0, 0, 0, 0, m66]])
             else:
                 #
-                self.K = np.loadtxt('/home/user/Desktop/Daniel_simulation/robosuite/daniel_learning_runs/run10/action/K.csv',
+                self.K = np.loadtxt('/home/user/Desktop/Daniel_simulation/robosuite/daniel_results/daniel_learning_runs/run10/action/K.csv',
                                     delimiter=',')
-                self.C = np.loadtxt('/home/user/Desktop/Daniel_simulation/robosuite/daniel_learning_runs/run10/action/C.csv',
+                self.C = np.loadtxt('/home/user/Desktop/Daniel_simulation/robosuite/daniel_results/daniel_learning_runs/run10/action/C.csv',
                                     delimiter=',')
-                self.M = np.loadtxt('/home/user/Desktop/Daniel_simulation/robosuite/daniel_learning_runs/run10/action/M.csv',
+                self.M = np.loadtxt('/home/user/Desktop/Daniel_simulation/robosuite/daniel_results/daniel_learning_runs/run10/action/M.csv',
                                     delimiter=',')
 
                 # self.K = np.array([[abs(action[0]), 0, 0, 0, action[1], 0],
