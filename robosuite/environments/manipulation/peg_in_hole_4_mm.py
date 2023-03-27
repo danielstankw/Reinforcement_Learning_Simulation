@@ -564,8 +564,8 @@ class PegInHoleSmall(SingleArmEnv):
             # trans_error = np.array([7.14533037e-04, -5.01936469e-04, 8.95959506e-01])
             trans_error = self.fixed_error_vec  # fixed error
         if self.error_type == 'ring':
-            r_low = 4.8 / 1000  # 3.3 / 1000
-            r_high = 4.8 / 1000  # 3.9 / 1000
+            r_low = 0.6 / 1000
+            r_high = 0.8 / 1000
             r = random.uniform(r_low, r_high)
             theta = random.uniform(0, 2 * np.pi)
             x_error = r * np.cos(theta)

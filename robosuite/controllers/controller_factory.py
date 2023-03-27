@@ -1,10 +1,10 @@
 """
 Set of functions that streamline controller initialization process
 """
-from .osc import OperationalSpaceController
-from .joint_vel import JointVelocityController
-from .joint_pos import JointPositionController
-from .joint_tor import JointTorqueController
+# from .osc import OperationalSpaceController
+# from .joint_vel import JointVelocityController
+# from .joint_pos import JointPositionController
+# from .joint_tor import JointTorqueController
 from .interpolators.linear_interpolator import LinearInterpolator
 from .impedance_near_hole import ImpedancePositionBaseControllerPartial
 from .impedance_near_hole_with_spiral import ImpedanceWithSpiral
@@ -117,28 +117,28 @@ def controller_factory(name, params):
                                           policy_freq=params["policy_freq"],
                                           ramp_ratio=params["ramp_ratio"])
 
-    if name == "OSC_POSE":
-        ori_interpolator = None
-        if interpolator is not None:
-            interpolator.set_states(dim=3)                # EE control uses dim 3 for pos and ori each
-            ori_interpolator = deepcopy(interpolator)
-            ori_interpolator.set_states(ori="euler")
-        params["control_ori"] = True
-        return OperationalSpaceController(interpolator_pos=interpolator,
-                                          interpolator_ori=ori_interpolator, **params)
-
-    if name == "OSC_POSITION":
-        if interpolator is not None:
-            interpolator.set_states(dim=3)                # EE control uses dim 3 for pos
-        params["control_ori"] = False
-        return OperationalSpaceController(interpolator_pos=interpolator, **params)
-
-    if name == "IK_POSE":
-        ori_interpolator = None
-        if interpolator is not None:
-            interpolator.set_states(dim=3)                # EE IK control uses dim 3 for pos and dim 4 for ori
-            ori_interpolator = deepcopy(interpolator)
-            ori_interpolator.set_states(dim=4, ori="quat")
+    # if name == "OSC_POSE":
+    #     ori_interpolator = None
+    #     if interpolator is not None:
+    #         interpolator.set_states(dim=3)                # EE control uses dim 3 for pos and ori each
+    #         ori_interpolator = deepcopy(interpolator)
+    #         ori_interpolator.set_states(ori="euler")
+    #     params["control_ori"] = True
+    #     return OperationalSpaceController(interpolator_pos=interpolator,
+    #                                       interpolator_ori=ori_interpolator, **params)
+    #
+    # if name == "OSC_POSITION":
+    #     if interpolator is not None:
+    #         interpolator.set_states(dim=3)                # EE control uses dim 3 for pos
+    #     params["control_ori"] = False
+    #     return OperationalSpaceController(interpolator_pos=interpolator, **params)
+    #
+    # if name == "IK_POSE":
+    #     ori_interpolator = None
+    #     if interpolator is not None:
+    #         interpolator.set_states(dim=3)                # EE IK control uses dim 3 for pos and dim 4 for ori
+    #         ori_interpolator = deepcopy(interpolator)
+    #         ori_interpolator.set_states(dim=4, ori="quat")
             
         # Import pybullet server if necessary
         global pybullet_server
@@ -150,15 +150,15 @@ def controller_factory(name, params):
                                            interpolator_ori=ori_interpolator,
                                            bullet_server_id=pybullet_server.server_id,
                                            **params)
-
-    if name == "JOINT_VELOCITY":
-        return JointVelocityController(interpolator=interpolator, **params)
-
-    if name == "JOINT_POSITION":
-        return JointPositionController(interpolator=interpolator, **params)
-
-    if name == "JOINT_TORQUE":
-        return JointTorqueController(interpolator=interpolator, **params)
+    #
+    # if name == "JOINT_VELOCITY":
+    #     return JointVelocityController(interpolator=interpolator, **params)
+    #
+    # if name == "JOINT_POSITION":
+    #     return JointPositionController(interpolator=interpolator, **params)
+    #
+    # if name == "JOINT_TORQUE":
+    #     return JointTorqueController(interpolator=interpolator, **params)
 
     if name == "IMPEDANCE_POSE_Partial":
         return ImpedancePositionBaseControllerPartial(interpolator=interpolator, **params)

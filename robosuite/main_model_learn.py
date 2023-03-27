@@ -211,12 +211,6 @@ def evaluate(model: "base_class.BaseAlgorithm",
         print(f"Episode number: {i+1},reward: {episode_reward}, sim time: {np.round(_info.get('time'),7)} "
               f"| horizon: {_info.get('horizon')} | real time {_info.get('episode').get('t')} ")
 
-        # my_dict['success'].append(_info.get('is_success'))
-        # my_dict['error'].append(_info.get('error'))
-        # #
-        # file_name = 'xgboost_error.pkl'
-        # with open(file_name, 'wb') as f:
-        #     pickle.dump(my_dict, f)
     mean_reward = np.mean(episode_rewards)
     std_reward = np.std(episode_rewards)
     if reward_threshold is not None:
@@ -265,7 +259,7 @@ def model_info_collect(model):
     return
 
 if __name__ == "__main__":
-    # Create log dir
+    # Create log directories for logging during training
     log_dir = './robosuite/'
     log_dir_extras = os.path.join(log_dir, 'extras')
     log_dir_callback = os.path.join(log_dir, 'callback')
@@ -274,29 +268,26 @@ if __name__ == "__main__":
     os.makedirs(log_dir_callback, exist_ok=True)
     os.makedirs(log_dir_extras, exist_ok=True)
 
-    """To collect data: use_spiral=True/ use_ml=False"""
-    use_spiral = False
+    # Settings
+    use_spiral = False  # Set to True if wish to use spiral search
     use_ml = False
-    threshold = 0.8
-    use_impedance = True  # or pd
-    plot_graphs = True
-    render = False
-    error_type = "fixed"
-    error_vec = np.array([4.2, 0.0, 0.0]) / 1000 # in mm
+    use_impedance = True  # if set to False, PD controller is used while contact
+    plot_graphs = False
+    render = True   # whether to render the simulation (For learning set to False to speed up)
+    error_type = "ring"  # 'none'/'ring' and 'fixed' --> see peg_in_hole_4_mm.py for definition of ring error
+    error_vec = np.array([4.2, 0.0, 0.0]) / 1000  # if error_type=fixed, here the error is set
     overlap_wait_time = 2.0
     circle_motion = False  # parameters of circle motion are in the controller file
 
-
-    # #
-# shir
-    total_sim_time = 90#25#5 #90#25
+    # Time of minimum jerk trajectory
+    total_sim_time = 25  # for spiral search use 90[sec]
     time_free_space = 2.5
     time_insertion = 13.5
 
     time_impedance = total_sim_time - (time_free_space + time_insertion)
 
-    control_freq = 20
-    control_dim = 26#26 # 38 # 32
+    control_freq = 20  # do not change
+    control_dim = 26  # number of impedance parameters
     horizon = total_sim_time * control_freq
 
     if use_spiral:
@@ -313,7 +304,7 @@ if __name__ == "__main__":
                          position_limits=None, orientation_limits=None, uncouple_pos_ori=True, control_delta=True,
                          interpolation=None, ramp_ratio=0.2, control_dim=control_dim, ori_method='rotation',
                          show_params=False, total_time=total_sim_time, plotter=plot_graphs, use_impedance=use_impedance,
-                         circle=circle_motion, wait_time=overlap_wait_time, threshold=threshold)
+                         circle=circle_motion, wait_time=overlap_wait_time, threshold=0.5)
 
     # Notice how the environment is wrapped by the wrapper
     env = GymWrapper(
@@ -339,13 +330,11 @@ if __name__ == "__main__":
             fixed_error_vec=error_vec  # mm
         )
     )
-    eval_steps = 1
-    learning_steps = 20_000
+    eval_steps = 100  # number of evaluation steps
+    learning_steps = 20_000  # number of learning episodes
     # seed = 4
-    seed = seed_initializer()
-    mode = 'new_train'
-    # mode = 'eval'
-    # mode = 'continue_train'
+    seed = seed_initializer()  # seed value
+    mode = 'eval'  # [eval/new_train/continue_train]
 
     env = Monitor(env, log_dir_callback, allow_early_resets=True)
     # Create the callback: check every check_freq steps
@@ -374,12 +363,7 @@ if __name__ == "__main__":
 
     if mode == 'eval':
         print('Evaluating Model')
-        # model = PPO.load("./daniel_n8_sim/sim11_n8/robosuite/callback/best_model_callback.zip", verbose=1, env=env)
-        # model = PPO.load("./daniel_n8_sim/sim15_n8/robosuite/callback/best_model_callback.zip", verbose=1, env=env) # requires rescale
-        # model = PPO.load("./daniel_n8_sim/sim16_n8/robosuite/callback/best_model_callback.zip", verbose=1, env=env) # requires rescale
-        # model = PPO.load("./daniel_learning_runs/run5/final5_constHolePos_HoleObs_10proc_scale_changedZWrench.zip", verbose=1, env=env)  # requires rescale
-        # model = PPO.load("./daniel_learning_runs/run7/robosuite/callback/best_model_callback.zip", verbose=1, env=env)  # requires rescale
-        model = PPO.load("./daniel_sim_results/daniel_original_benchmark/Daniel_n5_banchmark_single.zip", verbose=1, env=env)  # requires rescale
+        model = PPO.load("./daniel_results/daniel_sim_results/daniel_original_benchmark/Daniel_n5_banchmark_single.zip", verbose=1, env=env)  # requires rescale
 
     if mode == 'continue_train':
         print('Training Continuation')
