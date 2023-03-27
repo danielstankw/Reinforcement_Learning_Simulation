@@ -768,14 +768,24 @@ class ImpedanceWithSpiral(Controller):
         hole = self.sim.data.get_body_xpos("hole_hole")
         x_error_top = ERROR_TOP * np.cos(theta) + hole[0]
         y_error_top = ERROR_TOP * np.sin(theta) + hole[1]
+        x_error_bottom = 0.0004 * np.cos(theta) + hole[0]
+        y_error_bottom = 0.0004 * np.sin(theta) + hole[1]
 
+        time = self.sim.data.time
+        print(time)
+        print(self.overlap_time)
         plt.figure("Spiral")
+        # time to get inside hole with no impedance
+        plt.title(f'Spiral for: $e=4.8[mm]$, $v=1.5[m/s]$, $p=0.6[mm]$, $\Delta t={np.round(time-self.initialContactTime, 2)}$')
+        # time to get to overlap good for impedance
+        # plt.title(f'Spiral for: $e=3.9[mm]$, $v=1.5[m/s]$, $p=0.6[mm]$, $\Delta t={np.round((self.overlap_time-self.initialContactTime)+2.5, 2)}$')
         plt.plot(self.spiral_x, self.spiral_y, 'g', label='Ref position')
         plt.plot(self.robot_spiral_x, self.robot_spiral_y, 'b', label='Robot position')
-        plt.plot(x_error_top, y_error_top, 'r', label='Error_top')
-        plt.plot(hole[0], hole[1], "ro", label='hole position')
-        plt.plot(self.spiral_x[0], self.spiral_y[0], "go", label='spiral start position')
-        plt.plot(self.robot_spiral_x[0], self.robot_spiral_y[0], "bo")
+        plt.plot(x_error_top, y_error_top, 'r', label='Max Impedance Error: 0.7mm')
+        plt.plot(x_error_bottom, y_error_bottom, 'g', label='Max Free Insertion Error: 0.3mm')
+        plt.plot(hole[0], hole[1], "ro", label='Hole Center')
+        plt.plot(self.spiral_x[0], self.spiral_y[0], "go", label='Spiral Start Point')
+        # plt.plot(self.robot_spiral_x[0], self.robot_spiral_y[0], "bo")
         plt.legend()
         plt.grid()
         # plt.savefig(f"/home/user/Desktop/Simulation_measurements/{name}/Spiral.png")
@@ -1008,6 +1018,7 @@ class ImpedanceWithSpiral(Controller):
         # where p is distance between consequent rings and d is clearance in centralized peg
         v = 0.0015# 0.0025/1.5
         p = 0.0006  # distance between the consecutive rings
+        # p = 0.0012
         dt = 0.002
 
         theta_dot_current = (2 * np.pi * v) / (p * np.sqrt(1 + theta_current ** 2))
@@ -1070,7 +1081,7 @@ class ImpedanceWithSpiral(Controller):
         if np.sqrt((peg_x - hole_x) ** 2 + (peg_y - hole_y) ** 2) < 0.4/1000:
             self.stop = False
         # print(np.sqrt((peg_x - hole_x) ** 2 + (peg_y - hole_y) ** 2))
-        if np.sqrt((peg_x-hole_x)**2+(peg_y-hole_y)**2) < ERROR_TOP:
+        if np.sqrt((peg_x-hole_x)**2+(peg_y-hole_y)**2) <= ERROR_TOP:
             # print(np.sqrt((peg_x - hole_x) ** 2 + (peg_y - hole_y) ** 2))
             return True
         else:
