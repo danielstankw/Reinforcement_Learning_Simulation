@@ -1,7 +1,7 @@
 # Reinforcement Learning Simulation Framework for PiH assembly task.
 
 Simulation framework created based on Robosuite framework (https://github.com/ARISE-Initiative/robosuite). 
-It utilizes mujoco engine to model phyiscs of the enviornment. This repository contains simulation framework used to learn impedance parameters using reinforcement learning, more specifcally PPO. 
+It utilizes mujoco engine to model phyiscs of the enviornment. This repository contains simulation framework used to learn impedance parameters using reinforcement learning, more specifcally PPO. </br>
 
 ## System Overview
 * Robot: UR5e (6DOF)
@@ -56,7 +56,7 @@ Can be found `robosuite/controllers/...`
 ### Important to note
 1. When learning is completed two new folders will be created:
 `/robosuite/robosuite`: contains various callbacks, best models, and network parameters
-`/robosuite/learning_logs` contains tensorboard logs that can be used via` tensorboard --logdir=./learning_1` to display interactive plots.
+`/robosuite/learning_logs` contains tensorboard logs that can be used via `tensorboard --logdir=./learning_1` to display interactive plots.
 2. To figure out multiprocessing go to sb3 github and look for issues with my username, I asked a lot of question so you will be able to figure it out based on responses I got :)
 
 Good Luck !
