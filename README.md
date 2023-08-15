@@ -1,8 +1,24 @@
-### Peg In Hole environment for learning Impedance Control parameters.
+# Reinforcement Learning Simulation Framework for PiH assembly task.
 
-![](docs/images/env.png)
+Simulation framework created based on Robosuite framework (https://github.com/ARISE-Initiative/robosuite). 
+It utilizes mujoco engine to model phyiscs of the enviornment. This repository contains simulation framework used to learn impedance parameters using reinforcement learning, more specifcally PPO. 
 
-![](docs/images/peg.png)
+## System Overview
+* Robot: UR5e (6DOF)
+* Controller: PD (in free space) and Impedance + PD (in contact)
+* Trajectory planner: Minimum jerk trajectory
+* RL: Utilizes PPO for learning impedance parameters based on stable baseline 3 implementation.
+
+<div align="center">
+  <img src="docs/images/env.png" width="500">
+</div>
+
+ <div align="center">
+  <img src="docs/images/peg.png" width="500">
+</div>
+
+## Usage
+
 
 ### Description
 Robosuite simulation for Peg-In-Hole (PiH) task. 
