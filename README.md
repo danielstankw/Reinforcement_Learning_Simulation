@@ -28,7 +28,7 @@ For details see https://github.com/ARISE-Initiative/robosuite.
 ## Configuration Options
 The configuration option will be explained base on `main_model_learn.py`
 <div align="center">
-  <img src="https://github.com/danielstankw/Reinforcement_Learning_Simulation/assets/72759092/7376cc90-905c-41a6-bb74-8ae28554e8d" width="700">
+  <img src="https://github.com/danielstankw/Reinforcement_Learning_Simulation/assets/72759092/7965c3e0-e913-472d-9329-804d4600bba4" width="700">
 </div>
 
 
