@@ -8,6 +8,7 @@ It utilizes mujoco engine to model phyiscs of the enviornment. This repository c
 * Controller: PD (in free space) and Impedance + PD (in contact)
 * Trajectory planner: Minimum jerk trajectory
 * RL: Utilizes PPO for learning impedance parameters based on stable baseline 3 implementation.
+* Facilitates parallel learning: more specifically creation of parallel enviornments for experience collection
 
 <div align="center">
   <img src="docs/images/env.png" width="500">
@@ -18,14 +19,29 @@ It utilizes mujoco engine to model phyiscs of the enviornment. This repository c
 </div>
 
 ## Usage
+Run ```main_model_learn.py``` for learning, evaluation, visualization. </br>
+To use parallel learning functionality use `main_multi_learn.py`.
+
+## Instalation 
+For details see https://github.com/ARISE-Initiative/robosuite.
+
+## Configuration Options
+The configuration option will be explained base on `main_model_learn.py`
+<div align="center">
+  <img src="https://github.com/danielstankw/Reinforcement_Learning_Simulation/assets/72759092/7376cc90-905c-41a6-bb74-8ae28554e8d" width="700">
+</div>
 
 
-### Description
-Robosuite simulation for Peg-In-Hole (PiH) task. 
-Simulation modified during M.Sc. studies and used for learning impedance parameters of impedance controller.
-One set of impedance control parameters is learned per episode, thus the RL process is modified slightly, see `base.py` for modification.
+* `use_spiral`:  [boolean] whether to use spiral search
+* `use_ml`: whether to use ML model
+* `use_impedance`: if True, impedance controller is used for the contact stage of simulation, else a PD controller is utilized
+* `plot_graphs`: whether to display graphs at the end of episode (for training set to `False`)
+* `error_type`: `[ring, None, fixed]`: defines position error type
+* `error_vec`: defines magnitude of position error for `error_type=fixed`
+* `overlap_wait_time`: defines wait time when switching between spiral search and impedance control
+* `mode`: `eval/new_train/continue_train`: self explanatory
 
-
+## More details
 Includes: 
 * Custom environment for PiH includes peg, board with a hole.
 Can be found in `robosuite/enviornments/manipulation/peg_in_hole_4_mm.py`
